@@ -1,11 +1,19 @@
 sudo: required
 language: generic
 services: docker
-
 script:
-  # We use the docker image from https://hub.docker.com/r/dxjoke/tectonic-docker/
-  - docker pull dxjoke/tectonic-docker
-  # Compiling only main.tex:
-  - docker run --mount src=$TRAVIS_BUILD_DIR,target=/usr/src/tex,type=bind dxjoke/tectonic-docker /bin/sh -c "tectonic main.tex"
-  # Compiling multiple files as well as using biber:
-#  - docker run --mount src=$TRAVIS_BUILD_DIR/src,target=/usr/src/tex,type=bind dxjoke/tectonic-docker /bin/sh -c "tectonic --keep-intermediates --reruns 0 biber-mwe.tex; biber biber-mwe; tectonic biber-mwe.tex; tectonic main.tex"
+- docker pull dxjoke/tectonic-docker
+- docker run --mount src=$TRAVIS_BUILD_DIR,target=/usr/src/tex,type=bind dxjoke/tectonic-docker
+  /bin/sh -c "tectonic main.tex"
+env:
+  global:
+    secure: cNxIY1suRCivqMcCvMbfbmJuKMl1DYEsaGx2ebaC1Q0sfUTkoAjy4PSM17dXoP/8MMzz2iC1ilGRKn905z3ci65PByohLTFoDFoqsZXQHBEtiI+QFivIrRoQ8dPvQJJtMYEzQB2wmwje3ftPA70g0K81vhe0m3De9Gbi+9vtkQ5uLS3GXnmOUhjRR9uzaIn2r+DROffLdI7rtACWZ7yJHoDeSU3oU/12ZM7+DSls3hCAWYOAQRQIfnHJeRIo7OpYffQmDSjbmDgvtwG2KbDCXS3Os2y0lJBwlOhxNKuV6VnsuLkp2lRhc8DU0NP6azEHIfzxJ1nKE+zRMVjRcVJie7p0O19XqvZcVxgsoJj3oL0OZ6CZDedkaQnfYuL176saioNXcu3QAjWNy2ZCLHsnW/tpoBBRz8wQZMbrvq9HckT//zfbmR5/7pUKu8WPV3Gc8AJVDR1v1h02AgOVgIOA1aSoymZ9iGzxfa7Qmn3qXdt8njEgG72OcEUMqKnwzJVlCoO1lMJWU4mVGV0SNZ41mmYhtQlymhIRs+ckuaWyjPu4BF7CTkPl+0AmwxNdkFZdIw0KJO3gLDAEQ0y+OEHR1fEFDJzTNbNebJAHDEl1pcT3SpOgyfXoZa0b8+MblTispHaw09nzlqMZp79h3JcQHpKynUdyE9X3ihxWghllTMc=
+deploy:
+  provider: releases
+  api_key:
+    secure: cNxIY1suRCivqMcCvMbfbmJuKMl1DYEsaGx2ebaC1Q0sfUTkoAjy4PSM17dXoP/8MMzz2iC1ilGRKn905z3ci65PByohLTFoDFoqsZXQHBEtiI+QFivIrRoQ8dPvQJJtMYEzQB2wmwje3ftPA70g0K81vhe0m3De9Gbi+9vtkQ5uLS3GXnmOUhjRR9uzaIn2r+DROffLdI7rtACWZ7yJHoDeSU3oU/12ZM7+DSls3hCAWYOAQRQIfnHJeRIo7OpYffQmDSjbmDgvtwG2KbDCXS3Os2y0lJBwlOhxNKuV6VnsuLkp2lRhc8DU0NP6azEHIfzxJ1nKE+zRMVjRcVJie7p0O19XqvZcVxgsoJj3oL0OZ6CZDedkaQnfYuL176saioNXcu3QAjWNy2ZCLHsnW/tpoBBRz8wQZMbrvq9HckT//zfbmR5/7pUKu8WPV3Gc8AJVDR1v1h02AgOVgIOA1aSoymZ9iGzxfa7Qmn3qXdt8njEgG72OcEUMqKnwzJVlCoO1lMJWU4mVGV0SNZ41mmYhtQlymhIRs+ckuaWyjPu4BF7CTkPl+0AmwxNdkFZdIw0KJO3gLDAEQ0y+OEHR1fEFDJzTNbNebJAHDEl1pcT3SpOgyfXoZa0b8+MblTispHaw09nzlqMZp79h3JcQHpKynUdyE9X3ihxWghllTMc=
+  file: "./main.pdf"
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
