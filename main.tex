@@ -379,7 +379,7 @@
     The goal of the Fed is to choose $\theta$ such that they minimize $V[L_t]$. To solve, we first note that using the Law of Iterated Expectation, we have
     \[E_{t-1}[p_t] = E_{t-1}[w_t]\]
     We note that this implies that
-    \[E_{t-1}[L_t] = E_{t-1}[y_t] = E_{t-1}[p_t] - 0\]
+    \[E_{t-1}[L_t] = E_{t-1}[y_t] = E_{t-1}[p_t] = 0\]
     Then, 
     \[w_t = \theta p_t \implies L_t = \alpha(1-\theta)p_t + \alpha \widetilde{\varepsilon}_t\]
     Substituting into AS:
@@ -1964,7 +1964,9 @@
 \subsection{Macroempirics}
 
 \begin{itemize}
-    \item We're interested in causality, which means that we're interested in identification; we can't do any causal inference without proper identification. This is quite difficult in macro because of general equilibrium effects (things don't happen in a vacuum), dynamics, and expectations. It's also quite difficult to do a natural experiment. As an illustration, consider the naive approach to assessing the effect of interest rates on output by regressing $\triangle Y$ on $\triangle r$
+    \item We're interested in causality, which means that we're interested in identification; we can't do any causal inference without proper identification. This is quite difficult in macro because of general equilibrium effects (things don't happen in a vacuum), dynamics, and expectations. It's also quite difficult to do a natural experiment. As an illustration, consider the naive approach to assessing the effect of interest rates on output by regressing $\triangle Y$ on $\triangle r$. The issue with this approach is that monetary policy is endogeneous; the Fed cut $r$ in 2008 in response to a drop in $Y$. Further, even if the Fed tried to run an interest rate experiment, we'd have to worry about the effect of $r$ depending on the economic environment, such as zero-lower-bound.
+    \item \textbf{Randomized Control Trials}: these are sometimes used in macro, often in development macroeconomics. The issue is that you can't account for general equilibrium, so we'll have trouble using them broadly in macro.
+    \item \textbf{Natural Experiments}: try to find plausibly exogeneous variation in policy, and use that to regress
 \end{itemize}
 
 \section{Outstanding Questions}
