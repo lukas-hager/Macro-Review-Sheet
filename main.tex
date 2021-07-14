@@ -435,12 +435,8 @@
             So if we take (\ref{Imperfect Competition Markup}) as given, there are a few ways to get a pro-cyclical (or a-cyclical) real wage:
             \begin{itemize}
                 \item Real Business Cycle (RBC) literature: productivity shocks cause business cycle fluctuations, so both MPL and Y shift up during the expansion.
-                \item Make the markup $\mu$ countercyclical:
-                \begin{itemize}
-                    \item More firms enter in booms, so the goods market is much more competitive, so $Y \uparrow \implies \mu \downarrow$
-                    \item Booms induce price wars, so the cartel members want to cheat and gain lots of market share when there are a lot of customers
-                    \item During booms, people search more, and are maybe more picky about prices?
-                \end{itemize}
+                \item Make the markup $\mu$ countercyclical:  More firms enter in booms, so the goods market is much more competitive, so $Y \uparrow \implies \mu \downarrow$. Additionally, booms induce price wars, so the cartel members want to cheat and gain lots of market share when there are a lot of customers
+                \item During booms, people search more, and are maybe more picky about prices?
                 \item Real rigidity: P and W are both sticky, so real wage doesn't adjust to the market-clearing value, so it can be a-cyclical
             \end{itemize}
         \end{itemize}
@@ -1015,7 +1011,7 @@
               legend pos = north west
             ]
             \addplot[red,thick,
-            domain=0:.8,
+            domain=0:.79,
             range = 0:3]{.5 + (1/(.8-x))*.1};
             \addlegendentry{$w^*$}
             \addplot[blue,thick,
