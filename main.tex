@@ -1966,8 +1966,249 @@
 \begin{itemize}
     \item We're interested in causality, which means that we're interested in identification; we can't do any causal inference without proper identification. This is quite difficult in macro because of general equilibrium effects (things don't happen in a vacuum), dynamics, and expectations. It's also quite difficult to do a natural experiment. As an illustration, consider the naive approach to assessing the effect of interest rates on output by regressing $\triangle Y$ on $\triangle r$. The issue with this approach is that monetary policy is endogeneous; the Fed cut $r$ in 2008 in response to a drop in $Y$. Further, even if the Fed tried to run an interest rate experiment, we'd have to worry about the effect of $r$ depending on the economic environment, such as zero-lower-bound.
     \item \textbf{Randomized Control Trials}: these are sometimes used in macro, often in development macroeconomics. The issue is that you can't account for general equilibrium, so we'll have trouble using them broadly in macro.
-    \item \textbf{Natural Experiments}: try to find plausibly exogeneous variation in policy, and use that to regress. We have issues with external validity, however. We don't always have translatable results.
+    \item \textbf{Natural Experiments}: try to find plausibly exogeneous variation in policy, and use that to regress. We have issues with external validity, however. We don't always have translatable results. 
+    \item \textbf{Nakamura and Steinsson}: just because we can't normally use RCTs and natural experiments in macro to directly answer question doesn't mean that they're useless. We just need to focus on \textit{identified moments}. Once we have these, we can use them to rule out models that we don't think fit the moments and restrict our analyses to models that are compatible with our identified moments. It's important that these moments are identified; unconditional moments are dependent on a lot of parameters, and so the results are sensitive to parameters that aren't identified. Identified moments, on the other hand, are a function of structural shocks. This is a blessing and a curse; we robustly estimate the impact of the structural shocks, but we also pick the structural shocks, which is not entirely data-driven (so our estimation might not be right if we picked the wrong shocks or the wrong relationships between the shocks).
+    \item \textbf{Vector Auto Regression}: a vector $u_t$ is multivariate white noise if
+    \[\begin{split}
+        &E[u_t] = 0 \\
+        &E[u_tu_s'] = 0\; \text{if $s\neq t$}
+    \end{split}\]
+    A vector $x_t$ follows a VAR if 
+    \[x_t = \sum_{j=1}^pA_jx_{t-j} + u_t\]
+    where $u_t$ is multivariate white noise. This implies that an AR(1) model is just a scalar version with one lag, such that
+    \[x_t = \phi x_{t-1} + \varepsilon_t,\quad \varepsilon_t \sim \mathcal{N}(0,\sigma^2)\]
+    \item \textbf{Impulse Response Function}: an impulse response function (IRF) is the partial
+    \[\frac{\partial x_{t+j}}{\partial \varepsilon_t}\]
+    The IRF shows the impact $j$ periods after a shock. Assume that $x_t = 0$. Then 
+    \[\begin{split}
+        E_t[x_{t+j}] &= E_t[\phi x_{t+j-1} + \varepsilon_{t+j}] \\
+        &= E_t[\phi^2x_{t+j-2}] + \phi E_t[\varepsilon_{t+j-1}] + E_t[\varepsilon_{t+j}]\\
+        &= \hdots \\
+        &= \phi^j\varepsilon_t
+    \end{split}\]
+    We also have variance:
+    \[\begin{split}
+        V_t[x_{t+j}] &= E_t[x_{t+j}^2] - E_t[x_{t+j}]^2 \\
+        &= E_t[x_{t+j}^2] \\
+        &= E_t\left[\left(\sum_{i=1}^{j-1}\phi^i\varepsilon_{t+i}\right)^2\right] \\
+        &= \sum_{i=0}^{j-1}E_t\left[\phi^i\varepsilon_{t+i}^2\right] \\
+        &= \sum_{i=0}^{j-1}V\left[\phi^i\varepsilon_{t+i}\right] \\
+        &= \sum_{i=0}^{j-1}\phi^{2i}\sigma^2 \\
+    \end{split}\]
+    A bivariate VAR(1) will look like
+    \[\begin{split}
+        x_{1,t} = \phi_{11}x_{1,t-1} + \phi_{12}x_{2,t-1} + u_{1,t} \\
+        x_{2,t} = \phi_{21}x_{2,t-1} + \phi_{22}x_{2,t-1} + u_{2,t} \\
+    \end{split}\]
+    Writing this in matrix form is a little simpler:
+    \[\vec{x}_t = \Phi \vec{x}_{t-1} + \vec{u}_t\]
+    We are tempted to use the reduced form to estimate the impact of $u_t$ on $x_t$. The issue is that the shocks are not independent, so given that $u_2$ is correlated with $u_1$, $u_2$ impacts $x_1$ through its impact on $x_2$. In general, we'll have a covariance matrix that looks like
+    \[\boldsymbol{\Sigma} = E[u_tu_t'] = \begin{bmatrix}
+    V[u_{1,t}] & Cov[u_{1,t}, u_{2,t}] \\
+    Cov[u_{1,t}, u_{2,t}] & V[u_{2,t}]
+    \end{bmatrix}\]
+    However, if this matrix is diagonal (so the covariance terms are 0), then we can use the reduced form to find the impact of $u_t$ on $x_t$. This is the foundation of this identification strategy: make assumptions about which shocks impact which outcome variables, and use these assumptions to identify the impact of the shocks. To do this, we write
+    \[\varepsilon_t \equiv \textbf{Q}u_t\]
+    This implies that
+    \[E[\varepsilon_t\varepsilon_t'] = E[\textbf{Q}u_tu_t'\textbf{Q}'] = \textbf{Q}\boldsymbol{\Sigma} \textbf{Q}'\]
+    We claim that we can choose $\textbf{Q}$ such that the elements of $\varepsilon_t$ are uncorrelated and have variance 1, implying that
+    \[\textbf{Q}\boldsymbol{\Sigma} \textbf{Q}' = \textbf{I}\]
+    I guess if you can show that you can get a diagonal matrix, you should be able to just rescale that matrix to get the identity matrix. I'm not sure how to prove that you can always get a diagonal matrix, but you have $n^2$ parameters for $(n-1)^2$ equations, so it probably works. It may even be fewer equations because $\boldsymbol{\Omega}$ is symmetric, but whatever. There are also infinite of these! How do we pick one? First, note that 
+    \[u_t = \textbf{Q}^{-1}\varepsilon_t\]
+    Then we can write
+    \[\vec{x}_t = \Phi \vec{x}_{t-1} + \textbf{Q}^{-1}\vec{\varepsilon}_t\]
+    If we pick $\textbf{Q}$ such that $\textbf{Q}^{-1}$ is lower triangular, then we've decomposed the shocks; $x_1$ depends only on $\varepsilon_1$, while $x_2$ depends on both. This is the \textbf{Cholesky Decomposition}, and it is (apparently) unique, so there's only one matrix $\textbf{D}$ such that $\textbf{D}\textbf{D}' = \boldsymbol{\Sigma}$. This allows us to turn a reduced-form VAR(p)
+    \[\vec{x}_t = \sum_{j=1}^p\textbf{A}_j\vec{x}_{t-j} + \vec{u}_t\]
+    into a structural VAR
+    \[\vec{x}_t = \sum_{j=1}^p\textbf{A}_j\vec{x}_{t-j} + \textbf{D}^{-1}\vec{\varepsilon}_t\]
+    In the structural VAR, the IRFs are calculable given some shock in $\vec{\varepsilon}_t$.
+    \item \textbf{Lag Notation}: We define a lag operator $L$ such that 
+    \[L^jx_t = x_{t-j}\]
+    This allows us to rewrite a VAR(p) given by
+    \[x_t = \sum_{j=1}^p\textbf{A}_jx_{t-j} + u_t\]
+    as
+    \[A(L)x_t = u_t\]
+    where $A(L) = \textbf{I} - \sum_{j=1}^p\textbf{A}_jL^j$.
+    Additionally, if $A(L)$ is invertible, we can write
+    \[x_t = B(L)u_t\]
+    Further, if $|\phi| < 1$, we can write an AR(1) as a MA($\infty$):
+    \[\begin{split}
+        x_t &= \phi x_{t-1} + \varepsilon_t \\
+        &= \varepsilon_t + \phi \varepsilon_t + \phi^2x_{t-2} \\
+        &= \sum_{j=0}^{\infty}\phi^j\varepsilon_{t-j}
+    \end{split}\]
+    If we write with lags, we have
+    \[\begin{split}
+        &x_t = A(L)x_t + \varepsilon_t \\
+        \implies &(\textbf{I}-A(L))x_t = \varepsilon_t \\
+        \implies &x_t = \left(\textit{I}-A(L)\right)^{-1}\varepsilon_t \\
+        \implies &x_t = (\textbf{I} + \textbf{A}L + \textbf{A}^2L^2 + \hdots)u_t \\
+        \implies &x_t = u_t + \textbf{A}u_{t-1} + \textbf{A}^2u_{t-2} + \hdots 
+    \end{split}\]
+    We can always write a VAR($p$) in this way, but the matrices will not always be easy to get.
+    \item \textbf{IRF Matrix}: this matrix is one where the $(k,l)^{th}$ entry is the impulse response of $x_{l,t+j}$ to shock $u_{k,t}$. If we have a VAR(1), this is really easy to compute:
+    \[\frac{\partial x_{l, t+j}}{\partial u_{k,t}} = \textbf{A}^j(l,k)\]
+    In general, we'll want to use the VAR(1). We can always convert an ARMA process to a VAR(1) (so by extension we can always convert a VAR($p$) to a VAR(1)). Consider the arbitrary VAR(p) where $x$ is a $K\times 1$ vector:
+    \[\vec{x}_t = \boldsymbol{\phi}_1x_{t-1} + \boldsymbol{\phi}_2x_{t-2} + \hdots + \boldsymbol{\phi}_px_{t-p} + \vec{u}_t\]
+    Then we can write this as a VAR(1) with the following conversion to $\vec{y}_t$:
+    \[\underbrace{\begin{bmatrix}
+    \vec{x}_t \\
+    \vec{x}_{t-1} \\
+    \vdots \\
+    \vec{x}_{t-p+1}
+    \end{bmatrix}}_{y_t} = \underbrace{\begin{bmatrix}
+    \boldsymbol{\phi}_1 & \boldsymbol{\phi}_2 & \hdots & \boldsymbol{\phi}_p \\
+    \textbf{I}_K & \textbf{0}_K & \hdots & \textbf{0}_K \\
+    \vdots & \ddots & \hdots & \vdots \\
+    \textbf{0}_K & \hdots & \textbf{I}_K & \textbf{0}_K
+    \end{bmatrix}}_{\Phi}\underbrace{\begin{bmatrix}
+    \vec{x}_{t-1} \\
+    \vec{x}_{t-2} \\
+    \vdots \\
+    \vec{x}_{t-p}
+    \end{bmatrix}}_{y_{t-1}} + \underbrace{\begin{bmatrix}
+    \textbf{I}_K \\
+    \textbf{0}_K \\
+    \vdots \\
+    \textbf{0}_K
+    \end{bmatrix}}_{Z}\vec{u}_t\]
+    This implies that $y$ is $pK\times 1$, $\Phi$ is $pK\times pK$, and $Z$ is $pK \times K$ 
+    \item \textbf{IRF Cookbook}:
+    \begin{enumerate}
+        \item Choose the ordering of $x_t$ using economic reasoning (so that we can Cholesky decompose safely)
+        \item Estimate the reduced-form VAR($p$) with OLS, equation-by-equation
+        \item Compute the covariance matrix of $\hat{u}$, $\hat{\Sigma}$. 
+        \item Use this estimated matrix to get the Cholesky square root $\hat{D}^{-1}$
+        \item Write your VAR($p$) as a VAR(1):
+        \[\vec{y}_t = \boldsymbol{\hat{\Phi}}\vec{y}_{t-1} + \hat{\textbf{Z}}\varepsilon_t\]
+        and then the IRF matrix will be given by $\boldsymbol{\Phi}^j\hat{\textbf{Z}}$
+        \item To get standard errors, bootstrap $\widetilde{u}$ from $\hat{u}$ with replacement, and then get the IRF using the OLS coefficients (fixed) and the Cholesky square root from your bootstrap simulations (changing). Do this a lot, and then compute the standard errors on your simulated IRFs.
+    \end{enumerate}
+    \item \textbf{Forecasting Error}: consider the bivariate VAR(1):
+    \[\begin{bmatrix}
+    x_t \\
+    y_t \\
+    \end{bmatrix} = \begin{bmatrix}
+    A_{11} & A_{12} \\
+    A_{21} & A_{22}
+    \end{bmatrix}\begin{bmatrix}
+    x_{t-1} \\
+    y_{t-1} \\
+    \end{bmatrix} + \begin{bmatrix}
+    B_{11} & B_{12} \\
+    B_{21} & B_{22}
+    \end{bmatrix}\begin{bmatrix}
+    \varepsilon_t \\
+    \eta_t
+    \end{bmatrix}\]
+    Then the forecasting error is the residuals:
+    \[\begin{split}
+        x_{t+1} - E_t[x_{t+1}] &= B_{11}\varepsilon_{t+1} \\
+        y_{t+1} - E_t[y_{t+1}] &= B_{21}\varepsilon_{t+1} + B_{22}\eta_{t+1}
+    \end{split}\]
+    This means that the forecast variance is 
+    \[\begin{split}
+        V[x_{t+1}] = E_t\left[\left(x_{t+1} - E_t[x_{t+1}]\right)^2\right] &= B_{11}^2V[\varepsilon_{t+1}] = B_{11}^2 \\
+        V[y_{t+1}] = E_t\left[\left(y_{t+1} - E_t[y_{t+1}]\right)^2\right] &= B_{21}^2V[\varepsilon_{t+1}] + B_{22}^2V[\eta_{t+1}] = B_{21}^2 + B_{22}^2
+    \end{split}\]
+    The above follows from the fact that the shocks have variance 1 and are orthogonal by construction. Then we have that for $x_t$, all of the variance in shocks comes from $\varepsilon$, but for $y_t$, the variance can be decomposed into
+    \[\begin{split}
+        \frac{B_{21}^2}{B_{21}^2+B_{22}^2} = \text{\% of next-period variance accounted for by $\varepsilon$} \\
+        \frac{B_{22}^2}{B_{21}^2+B_{22}^2} = \text{\% of next-period variance accounted for by $\eta$} \\
+    \end{split}\]
+    \item \textbf{Notes}: there are other identification strategies, which include long-run restrictions, such as demand shocks having no real effect in the long-run, and sign restrictions. Also, our structural VARs aren't actually structural, because we're prescribing the impact of the shocks on them. Finally, VARs assume linearity and symmetric effects, you sometimes need a lot of lags in VAR, and you need to assume that there are time-invariant relationships between variables.
 \end{itemize}
+
+\subsection{Stochastic Calculus}
+
+\begin{itemize}
+    \item \textbf{Random Walk}: For a small time interval $\triangle$, which is discrete. Then the random walk is given by
+    \[\begin{split}
+        X_0 &= 0 \\
+        X_{t+\triangle} = X_t + \begin{cases}
+        h & \text{with probability $p$} \\
+        -h & \text{with probability $1-p$}
+        \end{cases}
+    \end{split}\]
+    So the expected change between $t$ and $t+\triangle$ is given by
+    \[\begin{split}
+        E_t[X_{t+\triangle} - X_t] &= E_t[X_{t+\triangle}] - X_t \\
+        &= X_t + ph - (1-p)h - X_t \\
+        &= (2p-1)h
+    \end{split}\]
+    The variance is
+    \[4p(1-p)h^2\]
+    Further, the total change between 0 and $t$ is given by
+    \[X_t - X_0 = \sum_{j=1}^{t/\triangle}X_{j\triangle} - X_{(j-1)\triangle}\]
+    In fact, this difference is itself a random walk with mean $(2p-1)h(t/\triangle)$ and variance $4p(1-p)h^2(t/\triangle)$.
+    \item \textbf{Continuous-Time Process}: imagine that we pick $\sigma$ and $\mu$ such that 
+    \[\begin{split}
+        h &= \sigma \sqrt{\triangle} \\
+        p &= \frac{1}{2}\left(1 + \frac{\mu}{\sigma}\sqrt{\triangle}\right)
+    \end{split}\]
+    Then $X_t - X_0$ (so the distance that the process moves over the course of time $t$) has mean
+    \[(2p-1)h(t/\triangle) = \mu t\]
+    and variance
+    \[4p(1-p)h^2(t/\triangle) = (\sigma^2 + \mu^2\triangle)t\]
+    If we send $\triangle \to 0$, then we get that the limiting distribution has mean $\mu t$ and variance $\sigma^2 t$. 
+    \item \textbf{Brownian Motion}: this process is a Brownian Motion, which is characterized by
+    \[\begin{split}
+        X_0 &= 0 \\
+        X_t &\sim \mathcal{N}(\mu t, \sigma^2 t)
+    \end{split}\]
+    This results in Donsker's Theorem: the limiting distribution of the random walk process is a Brownian Motion. 
+    \item \textbf{Wiener Process}: this is known as ``standard Brownian motion" and is characterized by
+    \[\begin{split}
+        W_0 &= 0 \\
+        W_t &\sim \mathcal{N}(0,t)
+    \end{split}\]
+    Specifically, a Wiener process is Brownian motion with $\mu = 0$ and $\sigma = 1$. We can also write a Wiener process as 
+    \[W_t \sim \varepsilon\sqrt{t} \;\text{ where } \varepsilon \sim \mathcal{N}(0,1)\]
+    We can write Brownian motions as
+    \[X_t = \underbrace{\mu t}_{\text{drift}} + \underbrace{\sigma W_t}_{\text{volatility}}\]
+    Note that 
+    \[\begin{split}
+        E[X_t] &= \mu t + \sigma E[W_t] = \mu t \\
+        V[X_t] &= \sigma^2 V[W_t] = \sigma^2 t
+    \end{split}\]
+    So this has the same distribution as the Brownian motion characterized previously. If we write the above as a stochastic differential, we have
+    \[dX_t = \mu dt + \sigma dW_t\]
+    \item \textbf{Itô Drift Diffusion Process}: this is a stochastic process given by
+    \[X_t = X_0 + \underbrace{\int_0^ta(X_s, s)ds}_{\text{Riemann Integral}} + \underbrace{\int_0^tb(X_s, s)dW_s}_{\text{Itô Integral}}\]
+    Written in differential form, we have
+    \[dX_t = a(X_t, t)dt + b(X_t, t)dW_t\]
+    Some examples of such functions $a(\cdot)$ and $b(\cdot)$ are
+    \[\begin{split}
+        \text{Wiener Process}:\; a(X_t,t) &= 0 \\ 
+        b(X_t,t) &= 1 \\
+        \text{Brownian Motion}:\; a(X_t,t) &= \mu \\
+        b(X_t,t) &= \sigma^2 \\
+        \text{Geometric Brownian Motion}:\; a(X_t,t) &= \mu X_t \\
+        b(X_t,t) &= \sigma X_t \\
+        \text{Ornstein-Uhlenbeck Process\footnote{This is a continuous time analog to AR(1)}}:\; a(X_t,t) &= \eta (\overline{X} - X_t) \\
+        b(X_t,t) &= \sigma
+    \end{split}\]
+    \item \textbf{Itô's Lemma}: this is a sketch of the proof. Take a Taylor expansion, and rearrange terms:
+    \[\begin{split}
+        dF(X_t, t) &\approx \frac{\partial F(X_t,t)}{\partial X_t}dX_t + \frac{\partial F(X_t,t)}{\partial t}dt + \frac{1}{2}\frac{\partial^2 F(X_t,t)}{\partial X_t^2}(dX_t)^2 + \frac{1}{2}\frac{\partial^2 F(X_t,t)}{\partial t^2}(dt)^2 \\
+        &\approx \frac{\partial F(X_t,t)}{\partial X_t}\left(a(X_t,t)dt + b(X_t,t)dW_t\right) + \frac{\partial F(X_t,t)}{\partial t}dt + \frac{1}{2}\frac{\partial^2 F(X_t,t)}{\partial X_t^2}(dX_t)^2 \\
+        &\approx \frac{\partial F(X_t,t)}{\partial X_t}\left(a(X_t,t)dt + b(X_t,t)dW_t\right) + \frac{\partial F(X_t,t)}{\partial t}dt \\
+        \hspace{4mm}&+ \frac{1}{2}\frac{\partial^2 F(X_t,t)}{\partial X_t^2}(a(X_t,t)^2(dt)^2 + 2a(X_t,t)b(X_t,t)dtdWt + b(X_t,t)^2(dW_t)^2) \\
+        &\approx \frac{\partial F(X_t,t)}{\partial X_t}\left(a(X_t,t)dt + b(X_t,t)dW_t\right) + \frac{\partial F(X_t,t)}{\partial t}dt + \frac{1}{2}\frac{\partial^2 F(X_t,t)}{\partial X_t^2} b^2(X_t,t)dt \\
+        &\approx \left(\frac{\partial F(X_t,t)}{\partial X_t}a(X_t,t) + \frac{1}{2}\frac{\partial^2 F(X_t,t)}{\partial X_t^2} b^2(X_t,t) + \frac{\partial F(X_t,t)}{\partial t}\right)dt + \frac{\partial F(X_t,t)}{\partial X_t}b(X_t,t)dW_t
+    \end{split}\]
+    The penultimate step follows from the fact that $dW_t$ is of order $\sqrt{dt}$, so it dominates. The general (vectorized) version of the above for a drift diffusion process given by
+    \[dX_t = A_t dt + B_t dW_t\]
+    Then Itô's Lemma yields
+    \[\begin{split}
+        dF(X_t,t) &= \left\{\left(\nabla_X F\right)'A_t + \frac{1}{2}Tr[B_t'(H_XF)B_t] + \frac{\partial F(X_t,t)}{\partial t}\right\}dt \\
+        &+ \left(\nabla_XF\right)'B_tdW_t
+    \end{split}\]
+    Here, $\nabla_XF$ is the gradient of the function and $H_X$ is the Hessian matrix of second derivatives.
+    \item \textbf{Notes}: Every well-behaved discrete-time Markov process is well-approximated by a diffusion process
+\end{itemize}
+
+\subsection{Continuous-Time Dynamic Programming}
 
 \section{Outstanding Questions}
 
