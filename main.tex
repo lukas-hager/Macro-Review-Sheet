@@ -2210,6 +2210,54 @@
 
 \subsection{Continuous-Time Dynamic Programming}
 
+\begin{itemize}
+    \item \textbf{Notation}:
+    \begin{itemize}
+        \item Endogeneous state variables $x$ (wealth)
+        \item Exogeneous state variables $z$ (labor productivity)
+        \item Choice variables $j$ (consumption)
+        \item Time interval $\triangle$
+        \item Discount factor $\beta \equiv e^{-\rho \triangle}$
+    \end{itemize}
+    The general form of these problems will resemble
+    \[\begin{split}
+        V(x,z) &= \max_j\; u(j,x)\triangle + \beta E[V(x',z')] \\
+        z' &\sim F(z) \\
+        x' &= G(j,x,z')
+    \end{split}\]
+    To derive the Bellman equation, we first approximate $e^{-\rho \triangle} \approx 1-\rho \triangle$. Putting that into the dynamic programming problem yields
+    \[V(x,z) = \max_j\; u(j,x)\triangle + (1-\rho \triangle) E[V(x',z')]\]
+    We can then subtract $(1-\rho \triangle)V(x,z)$ from both sides to get
+    \[\rho \triangle V(x,z) = \max_j\; u(j,x)\triangle + (1-\rho \triangle) E[V(x',z') - V(x,z)]\]
+    Dividing by $\triangle$ yields
+    \[\rho V(x,z) = \max_j\; u(j,x) + \frac{1-\rho \triangle}{\triangle} E[V(x',z') - V(x,z)]\]
+    This is limited by
+    \[\rho V(x,z) = \max_j\; u(j,x) + \lim_{\triangle \to 0}\frac{E[V(x',z') - V(x,z)]}{\triangle}\]
+    As long as $V$ is $C^2$, we have that
+    \[\lim_{\triangle \to 0}\frac{E[V(x',z') - V(x,z)]}{\triangle} = \frac{E[dV(x,z)]}{dt}\]
+    This gives us the \textbf{Hamilton-Jacobi-Bellman (HJB) equation}:
+    \begin{equation}\label{HJB}
+        \rho V(x,z) = \max_j\; u(j,x) + \frac{E[dV(x,z)]}{dt}
+    \end{equation}
+    To get to the final term, we need Itô's Lemma.
+    \item \textbf{Example}: Assume that $x,z$ one dimensional and
+    \[\begin{split}
+        dz_t &= \mu(z_t) dt + \sigma(z_t) dW_t \\
+        dx_t &= a(x_t, z_t, j_t)dt
+    \end{split}\]
+    Then Itô's Lemma says that
+    \[\frac{E[dV(x,z)]}{dt} = \frac{\partial V(x,z)}{\partial x}a(x,z,j) + \frac{\partial V(x,z)}{\partial z}\mu(z) + \frac{1}{2}\frac{\partial^2V(x,z)}{\partial z^2}\sigma^2(z)\]
+    Putting that into (\ref{HJB}), we have
+    \[\begin{split}
+        \rho V(x,z) &= \max_j\; u(j,x) \\
+        &\hspace{4mm}+\frac{\partial V(x,z)}{\partial x}a(x,z,j) + \frac{\partial V(x,z)}{\partial z}\mu(z) + \frac{1}{2}\frac{\partial^2V(x,z)}{\partial z^2}\sigma^2(z)
+    \end{split}\]
+    The first order condition is then
+    \[\frac{\partial u(j,x)}{\partial j} + \frac{\partial V(x,z)}{\partial x}\frac{\partial a(x,z,j)}{\partial j} = 0\]
+    This condition implicitly defines the policy function
+    \[j\left(\frac{\partial V(x,z)}{\partial x}, x, z\right)\]
+\end{itemize}
+
 \section{Outstanding Questions}
 
 \begin{enumerate}
