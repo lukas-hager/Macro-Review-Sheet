@@ -1,9 +1,12 @@
 \documentclass[12pt]{article}
 \usepackage[tbtags]{amsmath}
-\usepackage{latexsym,ifthen, amsfonts, amsthm, amssymb, bbm, bm, mathtools,comment, url}
+\usepackage{latexsym,ifthen, amsfonts, amsthm, amssymb, bbm, bm, mathtools,comment, url,dsfont}
 \usepackage{color}
 \usepackage{pgfplots}
 \usepackage{longtable}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \pgfplotsset{compat=1.17}
 \usepgfplotslibrary{fillbetween}
@@ -1227,6 +1230,8 @@
 
 \subsection{New Keynesian Model (TODO)}
 
+\subsection{Diamond-Mortensen-Pissarides Search Model (TODO)}
+
 \subsection{Optimal Growth Problem}
 
 \begin{itemize}
@@ -1660,6 +1665,122 @@
 \end{itemize}
 
 \section{ECON 503}
+
+\subsection{Investment Model}
+
+\begin{itemize}
+    \item \textbf{Motivation}: this model revolves around Tobin's $q$, which fundamentally is the ratio of a firm's value to the value of a firm's capital:
+    \[q = \frac{\text{Market Value of Firm Capital}}{\text{Replacement Cost of Capital}}\]
+    The basic example given is that if Tobin's $q$ is 1.5, the market believes that your capital is worth more inside of your firm than the value of the capital on its own; by this logic, you should acquire capital. This model attempts to test this assumption.
+    \item \textbf{Setup}: there is a price-taking firm that tries to maximize its PDV of profits. The firm produces using capital $K$ with production function $F(K)$, and it accumulates capital through investment $I$. However, when the firm chooses to change its capital stock, it incurs an adjustment cost $C(I)$, which is quadratic, so the larger the adjustment, the larger the cost. The relevant equations are then
+    \[\begin{split}
+        I &= \dot{K} \\
+        C(I) &= I + \frac{h}{2}I^2
+    \end{split}\]
+    Then, the Hamiltonian is given by
+    \[\mathcal{H} = e^{-rt}\left[F(K) - \left(I + \frac{h}{2}I^2\right)\right] + qe^{-rt}\left[I - \dot{K}\right]\]
+    Here, we call $K$ the state variable, $I$ the control variable, and $q$ is the costate variable (multiplier). $q$ can jump, while the others cannot. 
+    \item \textbf{Solving the Model}: The first order conditions are
+    \[\begin{split}
+        [I]:&\; -1 -hI + q = \frac{d}{dt}0 \implies -1 -hI + q = 0 \\
+        [K]:&\; e^{-rt}F'(K) = \frac{d}{dt}-qe^{-rt} \implies F'(K) = qr - \dot{q}
+    \end{split}\]
+    If we rearrange the FOC with respect to $I$, we have
+    \[I = \frac{q-1}{h}\]
+    So if $q=0$, the firm will have optimal $I = 0$, and investment is only positive (negative) when $q>1$($<1$). Rearranging the other FOC yields
+    \[\dot{q} = qr - F'(K)\]
+    To close the model, we also must impose the \textbf{Transversality Condition}, which states that all resources must be used up in infinite time (so you can't die with resources or debt). This is given by
+    \[\lim_{t\to\infty}qKe^{-rt} = 0\]
+    We can substitute $\dot{K} = I$ to get a system of dynamic equations:
+    \[\begin{split}
+        \dot{K} &= \frac{q-1}{h} \\
+        \dot{q} &= qr - F'(K)
+    \end{split}\]
+    We now note that this is not a linear system. As a result, we need to linearize it. The linearized system is given as a total differential here, which means that if we're close to the steady state, and assign tilde variables to be the steady state, we have
+    \[F(X,Y) \approx \frac{\partial F(X,Y)}{\partial X}(X - \widetilde{X}) + \frac{\partial F(X,Y)}{\partial Y}(Y - \widetilde{Y})\]
+    This means that our linearized system is given by
+    \[\begin{split}
+        \dot{K} &\approx \frac{1}{h}(q - \widetilde{q}) \\
+        \dot{q} &\approx r(q-\widetilde{q}) - F''(K)(K - \widetilde{K})
+    \end{split}\]
+    We can express this system in matrix form:
+    \[\begin{bmatrix}
+    \dot{K} \\
+    \dot{q}
+    \end{bmatrix} = \begin{bmatrix}
+    0 & \frac{1}{h} \\
+    - F''(K) & r
+    \end{bmatrix}\begin{bmatrix}
+    K-\widetilde{K} \\
+    q-\widetilde{q}
+    \end{bmatrix}\]
+    To ensure that we have a stable path (arm, in Turnovsky's language), we need a negative determinant in a 2$\times$2 linearized matrix. The determinant is then
+    \[0 \times r - (-F''(K) \times \frac{1}{h}) = \frac{F''(K)}{h} < 0\]
+    This follows from our assumptions about the production function (namely that it is increasing and has negative second derivative). We also need one negative and one positive eigenvalue ($\mu_1$ will be the negative eigenvalue by assumption in general). The negative eigenvalue determines the rate of convergence to steady state -- the more negative, the faster the convergence. To get the eigenvalues, subtract $\mu$ from the linearized matrix and get the determinant:
+    \[\begin{split}
+        &det\left(\begin{bmatrix}
+        -\mu & \frac{1}{h} \\
+         - F''(K) & r-\mu
+        \end{bmatrix}\right) = 0\\
+        \implies &-\mu(r-\mu) + \frac{F''(K)}{h} = 0 \\
+        \implies &\mu = \frac{r \pm \sqrt{r^2 - 4\frac{F''(K)}{h}}}{2}
+        \end{split}\]
+    then the assumption is that the stable eigenvalue is the smaller of the two eigenvalues, namely
+    \[\mu_1 = \frac{r - \sqrt{r^2 - 4\frac{F''(K)}{h}}}{2}\]
+    \item \textbf{General Solution}: in general, the solution to a differential system given by
+    \[\begin{bmatrix}
+    \dot{A} \\
+    \dot{B}
+    \end{bmatrix} = \begin{bmatrix}
+    M_{11} & M_{12} \\
+    M_{21} & M_{22}
+    \end{bmatrix} \begin{bmatrix}
+    A - \widetilde{A} \\
+    B - \widetilde{B}
+    \end{bmatrix}\]
+    will be of the form
+    \[\begin{split}
+        A(t) &= \widetilde{A} + C_{1}\nu_{11}e^{\mu_1 t} + C_2\nu_{12}e^{\mu_2t} \\
+        B(t) &= \widetilde{B} + C_1 \nu_{21}e^{\mu_1t} + C_2\nu_{22}e^{\mu_2t}
+    \end{split}\]
+    Here, the $C$ values aren't important; they're set to satisfy the initial conditions. The $\nu$ values are the associated eigenvector coefficients. We can normalize one set of $\nu$ values to 1. This means that we can solve for the $\nu$ values by
+    \[\begin{split}
+        &\begin{bmatrix}
+        -\mu & \frac{1}{h} \\
+         - F''(K) & r-\mu
+        \end{bmatrix}\begin{bmatrix}
+        1 \\
+        \nu
+        \end{bmatrix} = \begin{bmatrix}
+        0 \\
+        0
+        \end{bmatrix} \\
+        \implies &\nu = \mu h = \frac{\mu_1 - a_{11}}{a_{12}}\\
+        &\nu = \frac{F''(K)}{r-\mu} = 
+    \end{split}\]
+    We can now use either formulation to express the costate variable differential equation:
+    \[\begin{split}
+        K(t) &= \widetilde{K} + A_1 e^{\mu_1t} + A_2e^{\mu_2t} \\
+        q(t) &= \widetilde{q} + \left(\frac{\mu_1-a_{11}}{a_{12}}\right)A_1e^{\mu_1t} + \left(\frac{\mu_2-a_{11}}{a_{12}}\right)A_2e^{\mu_2t} \\
+        q(t) &= \widetilde{q} + \left(\frac{a_{21}}{\mu_1-a_{22}}\right)A_1e^{\mu_1t} + \left(\frac{a_{21}}{\mu_2-a_{22}}\right)A_2e^{\mu_2t} \\
+    \end{split}\]
+    As $\mu_2 > 0$, we must set $A_2 = 0$ to limit explosive equilibria. Further, we can take the formulation that makes it easier to sign the costate variable equation. Our system is 
+    \[\begin{split}
+        K(t) &= \widetilde{K} + A_1 e^{\mu_1t} \\
+        q(t) &= \widetilde{q} + \left(\frac{\mu_1-a_{11}}{a_{12}}\right)A_1e^{\mu_1t} \\
+        q(t) &= \widetilde{q} + \left(\frac{a_{21}}{\mu_1-a_{22}}\right)A_1e^{\mu_1t} \\
+    \end{split}\]
+    We now note that the slope of the stable arm in $K-q$ space is
+    \[\frac{q(t) - \widetilde{q}}{K(t)-\widetilde{K}} = \left(\frac{\mu_1-a_{11}}{a_{12}}\right) = \left(\frac{a_{21}}{\mu_1-a_{22}}\right)\]
+    The question is then whether this slope is negative or positive. We have
+    \[\begin{split}
+        \mu_1 - a_{11} &= \mu_1 - 0 < 0 \\
+        a_{12} &= \frac{1}{h} > 0 \\
+        a_{21} &= -F''(K) > 0 \\
+        \mu_1 - a_{22} &= \mu_1 - r < 0
+    \end{split}\]
+    As we can sign all the terms, we accept the first formulation, which implies that the slope is negative (although either formulation will work).
+\end{itemize}
 
 \section{ECON 509}
 
@@ -2256,6 +2377,848 @@
     \[\frac{\partial u(j,x)}{\partial j} + \frac{\partial V(x,z)}{\partial x}\frac{\partial a(x,z,j)}{\partial j} = 0\]
     This condition implicitly defines the policy function
     \[j\left(\frac{\partial V(x,z)}{\partial x}, x, z\right)\]
+    \item \textbf{Example Investment Problem}: consider an investment problem with stochastic depreciation. You have capital $K$, flow profits $\pi(K)$, investment $I$, and price of investment goods $p$. This yields the sequence problem
+    \[\begin{split}
+        \max_{I_t}\; &E\int_0^{\infty}\left[\pi(K_t) - p_tI_t\right]e^{-rt}dt \\
+        dK_t &= (I_t - \delta K_t)dt - \sigma K_tdz_{1t} \\
+        dp_t &= a(p_t)dt + b(p_t)dz_{2t}
+    \end{split}\]
+    The exogeneous shocks follow Brownian Motion with correlation $\rho$:
+    \[\begin{split}
+        [z_{1t},z_{2t}]' &\sim \mathcal{N}(\textbf{0}, \boldsymbol{\Sigma}_t) \\
+        \boldsymbol{\Sigma} &= \begin{bmatrix}
+        1 & \rho \\
+        \rho & 1 
+        \end{bmatrix}
+    \end{split}\]
+    We want to orthogonalize these shocks. We have that if $[\varepsilon_{1t}, \varepsilon_{2t}]$ are uncorrelated Wiener processes, then their joint distribution is given by
+    \[\begin{bmatrix}
+    \varepsilon_{1t} \\
+    \varepsilon_{2t} 
+    \end{bmatrix} \sim \mathcal{N}(\textbf{0}, \textbf{I}_t)\]
+    We also note the equivalency of these two processes:
+    \[\begin{bmatrix}
+    \varepsilon_{1t} \\
+    \rho \varepsilon_{1t} + \left(\sqrt{1-\rho^2}\right)\varepsilon_{2t}
+    \end{bmatrix} \sim \mathcal{N}(\textbf{0}, \boldsymbol{\Sigma}_t)\]
+    Hence, we can write the diffusion process as 
+    \[\begin{split}
+        dK_t &= (I_t - \delta K_t)dt - \sigma K_t d\varepsilon_{1t} \\
+        dp_t &= a(p_t)dt + b(p_t)\left[\rho d\varepsilon_{1t} + \left(\sqrt{1-\rho^2}\right)d\varepsilon_{2t}\right]
+    \end{split}\]
+    By Itô's Lemma:
+    \[\begin{split}
+        dF &= \begin{bmatrix}
+        \frac{\partial F}{\partial K_t} & \frac{\partial F}{\partial p_t} \\
+        \end{bmatrix}\begin{bmatrix}
+        (I_t - \delta K_t) \\
+        a(p_t)
+        \end{bmatrix}dt \\
+        &\hspace{4mm}+ \frac{1}{2}tr\left(\begin{bmatrix}
+        -\sigma K_t & b(p_t)\rho \\
+        0 & b(p_t)\left(\sqrt{1-\rho^2}\right)
+        \end{bmatrix}\begin{bmatrix}
+        \frac{\partial^2 F}{\partial K_t^2} & \frac{\partial^2 F}{\partial K_t\partial p_t} \\
+        \frac{\partial^2 F}{\partial K_t\partial p_t} & \frac{\partial^2 F}{\partial p_t^2}
+        \end{bmatrix}\begin{bmatrix}
+        -\sigma K_t & 0 \\
+        b(p_t)\rho & b(p_t)\left(\sqrt{1-\rho^2}\right)
+        \end{bmatrix}\right)dt \\
+        &\hspace{4mm}+ \begin{bmatrix}
+        \frac{\partial F}{\partial K_t} & \frac{\partial F}{\partial p_t} \\
+        \end{bmatrix}\begin{bmatrix}
+        -\sigma K_t & 0 \\
+        b(p_t)\rho & b(p_t)\left(\sqrt{1-\rho^2}\right)
+        \end{bmatrix}\begin{bmatrix}
+        d\varepsilon_{1t} \\
+        d\varepsilon_{2t}
+        \end{bmatrix}
+    \end{split}\]
+    You can substitute this into the HJB then, and use the fact that $E[d\varepsilon_{1t}] = E[d\varepsilon_{2t}] = 0$
+\end{itemize}
+
+\subsection{Merton Portfolio Choice Model}
+
+\begin{itemize}
+    \item \textbf{Model setup}: an agent chooses their investment in risk-free bonds $b_t$ and risky stocks $s_t$. The price of a bond $b_t^b$ grows deterministically at rate $r$:
+    \[dp_t^b = rp_t^bdt\]
+    The price of the stock $p_t^s$ follows a geometric Brownian motion:
+    \[dp_t^s = \mu p_t^sdt + \sigma p_t^s dW_t\]
+    Total wealth is given by
+    \[a_t = p_t^bb_t + p_t^ss_t\]
+    The agent also chooses consumption $c_t$ to solve
+    \[\max_{b_t,s_t,c_t}\; E\int_0^{\infty}\frac{c_t^{1-\gamma}}{1-\gamma}e^{-rt}dt\]
+    subject to constraints
+    \[\begin{split}
+        da_t &= b_tdp_t^b + s_tdp_t^s - c_tdt \\
+        &= b_trp_t^bdt + s_t\mu p_t^sdt + s_t \sigma p_t^sdW_t - c_tdt
+    \end{split}\]
+    We can define the portion of wealth invested in stocks by writing
+    \[x_t \equiv \frac{p_ts_t}{a_t} = 1 - \frac{p_t^bb_t}{a_t}\]
+    In this way, we can eliminate a redundant variable and write the problem as
+    \[\max_{x_t,c_t}\; E\int_0^{\infty}\frac{c_t^{1-\gamma}}{1-\gamma}e^{-rt}dt\]
+    subject to
+    \[da_t = [(1-x_t)ra_t + x_ta_t\mu - c_t]dt + x_ta_t\sigma dW_t\]
+    \item \textbf{Solving the model}: Note that there is only one state variable here, so we can use the univariate form of Itô's Lemma:
+    \[\frac{E[dV(a_t)]}{dt} = V'(a_t)\left[(1-x_t)ra_t + x_ta_t\mu-c_t\right] + \frac{1}{2}V''(a_t)\left(x_ta_t\sigma\right)^2\]
+    Implementing this into the HJB yields
+    \[rV(a_t) = \max_{x_t,c_t}\; \frac{c_t^{1-\gamma}}{1-\gamma} + \underbrace{V'(a_t)\left[(1-x_t)ra_t + x_ta_t\mu-c_t\right]}_{\text{expected change in wealth}} + \underbrace{\frac{1}{2}V''(a_t)\left(x_ta_t\sigma\right)^2}_{\text{volatility of wealth}}\]
+    As $V'(\cdot)>0, V''(\cdot) < 0$, the more volatility, the lower the value function. The first order conditions with respect to the choice variables are
+    \[\begin{split}
+        [c_t]:&\; c_t^{-\gamma} - V'(a_t) = 0 \\
+        [x_t]:&\; -V'(a_t)a_t(r+\mu) + V''(a_t)x_t(a_t\sigma)^2 = 0
+    \end{split}\]
+    These conditions imply that
+    \[\begin{split}
+        c_t^* &= \left(V'(a_t)\right)^{-\frac{1}{\gamma}} \\
+        x_t^* &=\frac{V'(a_t)(r+\mu)}{V''(a_t)a_t\sigma^2}
+    \end{split}\]
+    If we put this back into the HJB:
+    \[\begin{split}
+        rV(a_t) &= \frac{V'(a_t)^{\frac{1-\gamma}{\gamma}}}{1-\gamma}\\
+        &\hspace{4mm}+ V'(a)\left[\frac{V''(a_t)\sigma^2-V'(a_t)(r+\mu)}{V''(a_t)\sigma^2}r +\frac{V'(a_t)(r+\mu)}{V''(a_t)\sigma^2}\mu -\left(V'(a_t)\right)^{-\frac{1}{\gamma}} \right]\\
+        &\hspace{4mm}+ \frac{\left(V'(a_t)(r+\mu)\right)^2}{2V''(a_t)\sigma^2}
+    \end{split}\]
+    We can get an analytical form of the solution by guessing a functional form of the value function $V(a) = ka^{1-\gamma}$ for a constant $k$. If you solve this out, you can get that
+    \[\begin{split}
+        c_t^* &= \left[(1-\gamma)k\right]^{-\frac{1}{\gamma}}a_t \\
+        x_t^* &= \frac{\mu - r}{\gamma \sigma^2}
+    \end{split}\]
+    In particular, $x_t^*$ is a function of parameters, so it is unchanging, which means that the franction of wealth allocated to stocks and bonds is not changing (I believe this is due to a bunch of model assumptions like separability and utility functional form). Additionally, the wealth invested in stocks increases in $\mu$ (higher drift makes stocks more valuable) and is decreasing in $r,\gamma,\sigma$ (dislike volatility, and risk aversion moves people away from stocks).
+\end{itemize}
+
+\subsection{Job Search}
+
+\begin{itemize}
+    \item \textbf{Poisson/Counting Process}: generally, counting processes describe the number of arrivals in a time period. The Poisson counting process is given by a Poisson distribution with parameter $\lambda > 0$. It has PMF
+    \[P(k) = \frac{\lambda^k e^{-\lambda}}{k!}\]
+    Here, $k$ is the number of arrivals in a given time period. If $k=1$, the CDF is
+    \[1-e^{-\lambda}\]
+    The interpretation of this is the probability with which no more than one arrival occurs in the given time period. Correspondingly, we call something a Poisson process with arrival rate $\lambda$ if the time at which the first arrival occurs has distribution 
+    \[P(t\leq \tau) = 1 - e^{-\lambda \tau}\]
+    This process has the following properties:
+    \begin{enumerate}
+        \item $P(t = 0) = 0$ \\
+        \item $\lim_{\tau \to \infty} P(t \leq \tau) = 1$
+        \item $E[t] = \frac{1}{\lambda}$
+        \item The process is ``memoryless", i.e. gambler's fallacy applies. Just because you've waited ten minutes for a bus that was supposed to arrive ten minutes ago doesn't make it more likely that the bus will occur in the next minute than it would be if you hadn't been waiting. Mathematically:
+        \[\begin{split}
+            P(t \leq \tau | t > s) &= \frac{P(s < t \leq \tau)}{P(s < t)} \\
+            &= \frac{1-e^{-\lambda \tau} - (1-e^{-\lambda s})}{1 - (1-e^{-\lambda s})} \\
+            &= \frac{e^{-\lambda s} - e^{-\lambda \tau}}{e^{-\lambda s}} \\
+            &= \frac{e^{-\lambda s}(1 - e^{-\lambda (\tau - s)})}{e^{-\lambda s}} \\
+            &= 1- e^{-\lambda(\tau - s)}
+        \end{split}\]
+    \end{enumerate}
+    In a general arrival process, we have that
+    \[P(t \leq \tau) = 1 - e^{-\int_0^{\tau}\lambda_sds}\]
+    If $\lambda_s = \lambda$, then this is a Poisson process (arrival is time-invariant).
+    \item \textbf{Model setup}: we want to move past McCall, which is overly simplistic. Instead, we can incorporate some heterogeneity by having job market frictions manifested in a reduced-form matching function where the number of matches is a function of the number of unemployed and vacancies. If there are more workers and firms searching, then there are more matches. Our technical assumptions will be that there are a unit mass of workers, and firms employ at most one worker. Firms and workers either produce or search. Our notation is that there's an unemployment rate $u$ and a vacancy rate $v$. Matches dissolve exogeneously with arrival rate $\lambda$. The rate of match creation is given by a matching function $m(u,v)$, where $m(\cdot)$ is increasing in $u,v$, concave in $u,v$, and homogeneous of degree 1, which means that
+    \[m(\alpha u, \alpha v) = \alpha m(u,v)\]
+    Matches are also randomly distributed among the searchers. 
+    \item \textbf{Labor Market Tightness}: we use this metric often in this model; what is the ratio of vacancy rate to unemployment rate? We define this as
+    \[\theta \equiv \frac{v}{u}\]
+    The rate of firms finding matches is then
+    \[\frac{m(u,v)}{v} = m\left(\frac{u}{v}, 1\right) = m(\theta^{-1}, 1) \equiv q(\theta)\]
+    Similarly, the rate at which unmployed workers find a match is given by
+    \[\frac{m(u,v)}{u} = m\left(1, \frac{v}{u}\right) = \frac{v}{u}m(\theta^{-1}, 1) = \theta q(\theta)\]
+    The evolution of $u$ is given by
+    \[\dot{u}_t = \underbrace{(1-u_t)\lambda}_{\text{lose job}} - \underbrace{\frac{m(u_t,v_t)}{u_t}}_{\text{job finding rate}}u\]
+    At steady state, $\dot{u}_t = 0$, so we have
+    \[u = 1 - \frac{m(u,v)}{\lambda}\]
+    This allows us to get the Beveridge curve:
+    \begin{equation}\label{Beveridge Curve}
+        \frac{d u}{d v} = -\frac{m_v(u,v)}{\lambda} < 0
+    \end{equation}
+    Empirically, this does seem to hold, although the most recent data is a little all over the place (2009-2020).
+    \item \textbf{Technology, Preferences, and Markets}: 
+    \begin{itemize}
+        \item Jobs produce output flow $p$
+        \item Vacancy flow cost $pc$
+        \item Wage flow $w_t$
+        \item Unemployment benefit flow $z$
+        \item Workers and firms are infinitely lived and \textit{risk-neutral}
+        \item They attempt to maximize the present-discounted value of their lifetime income with discount rate $r$
+        \item There are no capital market frictions, and there's perfect competition (free entry for firms, long-run profit must be 0)
+    \end{itemize}
+    \item \textbf{Value of a vacancy}: the distribution of arrival times is an arrival process with rate $q(\theta_t)$, i.e. the firm vacancy filling rate. Hence, the distribution (CDF) of times when a vacancy at time $t$ is filled is
+    \[F(\tau) = 1 - e^{-\int_t^{\tau}q(\theta_s)ds}\]
+    We can use Leibniz rule to compute the PDF:
+    \[\begin{split}
+        f(\tau) &= \left(\frac{d}{d\tau}\int_t^{\tau}q(\theta_s)ds\right)e^{\int_t^{\tau}q(\theta_s)ds} \\
+        &= q(\theta_{\tau})e^{\int_t^{\tau}q(\theta_s)ds}
+    \end{split}\]
+    This represents the probability that at time $\tau$, a vacancy is filled. Using the PDF, we can compute the expected value of a vacancy by getting the PDV of a vacancy filled at time $\tau$ weighted by the probability that the vacancy is first filled at time $\tau$ (recall that the discount factor is $e^{-r\tau}$, so accounting for the fact that we're starting at time $t$, we discount by $e^{-r(\tau - t)}$):
+    \[V_t = \int_t^{\infty} \underbrace{q(\theta_{\tau}) e^{-\int_t^{\tau}q(\theta_s)ds}}_{\text{P(Vacancy filled at $\tau$)}} \underbrace{\left[e^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\} - \int_t^{\tau} e^{-r(s-t)}pcds\right]}_{\text{PDV of match $-$ cumulative PDV of posting cost until $\tau$}}d\tau\]
+    Note that the final term can be simplified:
+    \[\begin{split}
+        \int_t^{\tau} e^{-r(s-t)}pcds &= e^{rt}pc\int_t^{\tau} e^{-rs} \\
+        &= e^{rt}pc\left[-\frac{e^{-rs}}{r}\right]_t^{\tau} \\
+        &= e^{rt}pc\left[\frac{e^{-rt} -e^{-r\tau}}{r}\right] \\
+        &= \left(\frac{1 -e^{-r(\tau - t)}}{r}\right)pc \\
+    \end{split}\]
+    So we can rewrite:
+    \[V_t = \int_t^{\infty} q(\theta_{\tau}) e^{-\int_t^{\tau}q(\theta_s)ds} \left[e^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\} - \left(\frac{1 -e^{-r(\tau - t)}}{r}\right)pc\right]d\tau\]
+    Now we can get $\dot{V}$ by differentiating this expression with respect to $t$. Here again we require Leibniz rule:
+    \[\begin{split}
+        \dot{V}_t &= -q(\theta_t)\left(\max \{J_t, V_t\}\right) \\
+        &+\int_t^{\infty}q(\theta_{\tau}) q(\theta_t)e^{-\int_t^{\tau}q(\theta_s)ds} \left[e^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\} - \left(\frac{1 -e^{-r(\tau - t)}}{r}\right)pc\right]d\tau \\
+        &+\int_t^{\infty} q(\theta_{\tau}) e^{-\int_t^{\tau}q(\theta_s)ds} \left[re^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\} +e^{-r(\tau - t)}pc\right]d\tau
+    \end{split}\]
+    First, note that the second line is simply $q(\theta)V_t$. Thus, we can simplify by substituting that and simplifying the third line somewhat:
+    \[\begin{split}
+        \dot{V}_t &= -q(\theta_t)\left(\max \{J_t, V_t\}\right) \\
+        &+q(\theta_t)V_t \\
+        &+\int_t^{\infty} q(\theta_{\tau}) e^{-\int_t^{\tau}q(\theta_s)ds} e^{-r(\tau - t)}\left[r\max \{J_{\tau}, V_{\tau}\} +pc\right]d\tau
+    \end{split}\]
+    We simplify one more time, just using algebra:
+    \[\begin{split}
+        e^{-r(\tau - t)}\left[r\max \{J_{\tau}, V_{\tau}\}+pc\right] &= e^{-r(\tau - t)}r\left[\max \{J_{\tau}, V_{\tau}\}+\frac{pc}{r}\right] \\
+        &= e^{-r(\tau - t)}r\left[\max \{J_{\tau}, V_{\tau}\}+\left(1 + e^{r(\tau - t)} - e^{r(\tau - t)} \right)\frac{pc}{r}\right] \\
+        &= r\left[e^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\}+\left(e^{-r(\tau - t)} + 1 - 1\right)\frac{pc}{r}\right] \\
+        &= pc + r\left[e^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\}-\left(\frac{1-e^{-r(\tau - t)}}{r} \right)pc\right] \\
+    \end{split}\]
+    So then substituting this into the value function and making a few minor tweaks (taking constant terms outside of integrals and splitting the integral), we have
+    \[\begin{split}
+        \dot{V}_t &= -q(\theta_t)\left(\max \{J_t, V_t\}\right) \\
+        &+q(\theta_t)V_t \\
+        &+pc\int_t^{\infty} q(\theta_{\tau}) e^{-\int_t^{\tau}q(\theta_s)ds}d\tau\\
+        &+ r\int_t^{\infty}q(\theta_{\tau})e^{-\int_t^{\tau}q(\theta_s)ds}\left[e^{-r(\tau - t)}\max \{J_{\tau}, V_{\tau}\}-\left(\frac{1-e^{-r(\tau - t)}}{r} \right)pc\right]d\tau
+    \end{split}\]
+    The last line is just $rV_t$. In the third line, we can actually compute the integral (recall the Leibniz rule derivation previously):
+    \[\begin{split}
+        pc\int_t^{\infty} q(\theta_{\tau}) e^{-\int_t^{\tau}q(\theta_s)ds}d\tau &= pc\left[-e^{-\int_t^{\tau}q(\theta_s)ds}\right]_t^{\infty} \\
+        &= pc\left(-e^{-\int_t^{\infty}q(\theta_s)ds} + e^{-\int_t^tq(\theta_s)ds}\right) \\
+        &= pc
+    \end{split}\]
+    So then substituting this in, we have
+    \[\begin{split}
+        \dot{V}_t &= -q(\theta_t)\left(\max \{J_t, V_t\}\right) +q(\theta_t)V_t +pc+ rV_t \\
+        &= -q(\theta_t)\left(max \{J_t, V_t\} - V_t\right) +pc+ rV_t \\
+        &= -q(\theta_t)\left(\max \{J_t-V_t, 0\}\right) +pc+ rV_t \\
+    \end{split}\]
+    We can rearrange this term to get something in the form of our traditional HJB:
+    \begin{equation}\label{V HJB}
+        rV_t = -pc + \dot{V}_t + q(\theta_t)\max\{J_t-V_t, 0\}
+    \end{equation}
+    Here, $-pc$ is the flow cost of vacancy (posting cost), $\dot{V}_t$ represents the changing value of a vacancy, and $q(\theta_t)\max\{J_t-V_t,0\}$ is the expected value of searching for a worker. The value of a filled job to the firm is then given by $\max\{J_t,V_t\}$ where $J_t$ is characterized by
+    \begin{equation}\label{J HJB}
+        rJ_t = p - w_t + \dot{J}_t + \lambda (V_t -J_t)
+    \end{equation}
+    Correspondingly, for the worker, the HJBs are 
+    \[\begin{split}
+        rU_t &= z + \dot{U}_t + \theta_tq(\theta_t)\max\{W_t-U_t,0\} \\
+        rW_t &= w_t + \dot{W}_t + \lambda (U_t - W_t)
+    \end{split}\]
+    Note that these are direct analogs to the firm's conditions. So the approach to get $W_t$ is the same; not sure about the other one.
+    \item \textbf{Nash Bargaining Wages}: the surplus generated by a filled job is
+    \[S_t = (W_t - U_t) + (J_t - V_t)\]
+    This surplus is divided according to Nash bargaining; we solve for $w_t$ where 
+    \[w_t = \text{argmax}\; (W_t - U_t)^{\beta}(J_t - V_t)^{1-\beta}\]
+    Here, $\beta \in [0,1]$ and represents the worker's bargaining power. The extremes are that the wage is set at all of the worker's surplus when $\beta = 0$ and all of the firm's surplus when $\beta = 1$. Taking the first order condition, we get
+    \[\beta(W_t-U_t)^{\beta-1}(J_t - V_t)^{1-\beta}\frac{d(W_t-U_t)}{dw_t} + (1-\beta)(W_t-U_t)^{\beta}(J_t - V_t)^{-\beta}\frac{d(J_t-V_t)}{dw_t} = 0\]
+    We now note that the wage cannot impact the total surplus, as it's a transfer from one of the parties to the other (it dictates how to split the surplus, and doesn't impact the size of the pie), meaning that
+    \[\frac{d(W_t-U_t)}{dw_t} = -\frac{d(J_t - V_t)}{dw_t}\]
+    Putting this into the first order condition, we arrive at
+    \[\begin{split}
+        &\beta \left(\frac{W_t-U_t}{J_t-V_t}\right)^{\beta - 1} = (1-\beta)\left(\frac{W_t-U_t}{J_t-V_t}\right)^{\beta} \\
+        \implies &W_t - U_t = \frac{\beta}{1-\beta}(J_t - V_t)
+    \end{split}\]
+    If we assume that $S_t > 0$, then $W_t > U_t$ and $J_t > V_t$. 
+    \item \textbf{Steady State}: By free entry, we also have that if $V_t > 0$, firms will enter and drive the surplus to zero, which by the firm's vacancy HJB ($\ref{V HJB}$) at steady state implies that
+    \[J = \frac{pc}{q(\theta)}\]
+    Assessing the steady state of the other HJB equations, we have
+    \[\begin{split}
+        rJ &= p - w - \lambda J_t\\
+        rU &= z + \theta q(\theta)(W - U) \\
+        rW &= w - \lambda(W - U)
+    \end{split}\]
+    Subtract the two worker's conditions to obtain
+    \[\begin{split}
+        &r(W-U) = w - z - (\theta q(\theta) + \lambda)(W-U) \\
+        \implies &w-z = (r + \theta q(\theta) + \lambda)(W-U)
+    \end{split}\]
+    If we substitute in the Nash bargaining condition (again taking $V=0$), we have
+    \[w-z = (r + \theta q(\theta) + \lambda)\left(\frac{\beta}{1-\beta}\right)J\]
+    Combining the firm's HJBs yields
+    \[J = \frac{pc}{q(\theta)} = \frac{p-w}{r + \lambda}\]
+    Combine those expressions:
+    \begin{equation}\label{Job Search Optimal Wage}
+        \begin{split}
+        &w-z = \left(r + \theta \left(\frac{pc(r+\lambda)}{p-w}\right) + \lambda\right)\left(\frac{\beta}{1-\beta}\right)\left(\frac{p-w}{r + \lambda}\right) \\
+        \implies &w-z = \left(\frac{\beta}{1-\beta}\right)(\theta pc + p - w) \\
+        \implies &w \left(1+\frac{\beta}{1-\beta}\right) = \left(\frac{\beta}{1-\beta}\right)(\theta pc + p) + z \\
+        \implies &w^* = \beta (\theta pc + p) + (1-\beta)z
+    \end{split}
+    \end{equation}
+    If we put this optimal wage back into the firm's HJB, we get an expression for the optimal labor market tightness:
+    \begin{equation}\label{Job Search Optimal Tightness}
+        \begin{split}
+            &\frac{pc}{q(\theta^*)} = \frac{p-w^*}{r+\lambda} \\
+            \implies &\frac{pc}{q(\theta^*)} = \frac{p-\beta (\theta pc + p) - (1-\beta)z}{r+\lambda} \\
+        \end{split}
+    \end{equation}
+    Because $q(\cdot)$ is concave in its argument, equation (\ref{Job Search Optimal Tightness}) will yield the optimal labor market tightness. You can use this parameter (and the optimal wage) to solve for all of the other parts of the model.
+    \item \textbf{Efficiency}: this solution is not necessarily efficient, as there are externalities present in the model. First, firms make it more difficult for other firms to find a worker when they post a vacancy. Second, firms make it easier for an unemployed worker to find a job when they post a job vacancy. Firms neglect these considerations when they make their decisions about posting, so we are not guaranteed efficiency. In particular, the social planner faces a tradeoff when deciding whether to lower the unemployment rate $u$. If the unemployment rate is lower, there are benefits as employed workers produce more than the unemployment benefit. The cost is that if the unemployment rate is low, it will be difficult for the firms to fill vacancies, which they will need to do as matches are exogeneously destroyed (recall that $m(\cdot)$ is increasing in $u,v$).
+    \item \textbf{Social Planner's Problem}: the social planner tries to maximize surplus in the economy, subject to the evolution of unemployment:
+    \[\begin{split}
+        \max_{u_t,v_t}&\;\int_t^{\infty}\left[(1-u_t)p + u_tz - v_tpc\right]e^{-rt}dt \\
+        \text{subject to }\dot{u}_t &= (1-u_t)\lambda - v_tq\left(\frac{v_t}{u_t}\right)
+    \end{split}\]
+    We solve this problem using the following Hamiltonian:
+    \[\mathcal{H} = \left[(1-u_t)p + u_tz - v_tpc\right]e^{-rt} + \mu_te^{-rt}\left[(1-u_t)\lambda - v_tq\left(\frac{v_t}{u_t}\right) - \dot{u}_t\right]\]
+    This has first order conditions
+    \[\begin{split}
+        [v_t]:\;& -pc- \mu_t\left(q\left(\frac{v_t}{u_t}\right)+ \frac{v_t}{u_t}q'\left(\frac{v_t}{u_t}\right)\right) = 0 \\
+        [u_t]:\;& z-p-\mu_t\lambda + \mu_t\frac{v_t^2}{u_t^2}q'\left(\frac{v_t}{u_t}\right) = r\mu_t - \dot{\mu}_t \\
+        [\text{TVC}]:\;& \lim_{t\to\infty}\mu_tu_t = 0
+    \end{split}\]
+    As previously, we don't care about the dynamics, so focus on the steady state. In this case, again taking $\theta = \frac{v}{u}$, we have
+    \[\begin{split}
+        [v_t]:\;& pc =-\mu(q(\theta) + \theta q'(\theta)) \\
+        [u_t]:\;&z - p = \mu(r+\lambda - \theta^2q'(\theta))
+    \end{split}\]
+    We now define a matching elasticity as 
+    \[\eta(\theta) = -\frac{\theta q'(\theta)}{q(\theta)}\]
+    Dividing through both conditions by $q(\theta)$ yields
+    \[\begin{split}
+        [v_t]:\;& \frac{pc}{q(\theta)} =\mu(\eta(\theta)-1) \\
+        [u_t]:\;&\frac{z - p}{q(\theta)} = \mu\left(\frac{r+\lambda}{q(\theta)} + \theta\eta(\theta)\right)
+    \end{split}\]
+    Combining yields the condition
+    \[\frac{pc}{q(\theta^*)} = \frac{p - (1-\eta(\theta^*))z - \eta(\theta^*)(1+\theta^*c)p}{r+\lambda}\]
+    This is the identical condition to the decentralized economy when $\beta = \eta(\theta^*)$. This is the \textbf{Hosios Condition}. 
+    \item \textbf{Hosios Condition Intuition}: $1-\beta$ is the individual firm's return to a vacancy, while $1-\eta(\theta)$ is the social return to a vacancy. If $\beta > \eta(\theta^*)$, then the wage is too high and firms don't post enough vacancies (unemployment is too high). The opposite is true when $\beta < \eta(\theta^*)$
+\end{itemize}
+
+\subsection{Inaction}
+
+\begin{itemize}
+    \item \textbf{Motivation}: we've only done continuous things to this point, but some things in life are discrete and irreversible (should I shut down this plant?) This section will show how to solve these models.
+    \item \textbf{Exercising an Option}: suppose a plant earns profits $\pi(x)$ for as long as it operates, while the state variable $x$ follows Brownian motion given by
+    \[dx_t = \mu t + \sigma W_t\]
+    When closed, the plant has scrap value $S$, and future profits are discounted at rate $r$. The firm faces problem
+    \[V(x_0) = \max_{T\geq 0}\; \int_0^Te^{-rt}\pi(x_t)dt + e^{-rT}S\]
+    The firm is choosing time $T$ to shut down the plant and realize scrap value. $T$ will be determined by $x_t$ (i.e. $T(x_t)$). We make assumptions $r>0$, $S>0$, $\mu < 0$, $\pi(\cdot)$ is strictly increasing, bounded, and continuous, with $\pi(0) = 0$. 
+    \item \textbf{Deterministic Option Case}: If there is no Wiener process (so no expectations, $\sigma =0$), then the problem is
+    \[\max_{T\geq 0}\; \int_0^Te^{-rt}\pi(x_0 + \mu t)dt + e^{-rT}S\]
+    This has first order condition (using Leibniz rule):
+    \[[T]:\; \pi(x_0 + \mu T) -rS = 0\]
+    This characterizes the optimal solution: shut down at $x^*$ such that
+    \[\pi(x^*) = rS\]
+    This is the same as saying that the solution is shutting down at $T^*$ such that
+    \[\pi(x_0 + \mu T^*) = rS \implies T^* = \frac{\pi^{-1}(rS) - x_0}{\mu}\]
+    \item \textbf{Recursive Formulation}: we again call $\triangle$ a small time interval. Then this problem can be written as
+    \[\begin{split}
+        V(x_0) &= \int_0^Te^{-rt}\pi(x_t)dt + e^{-rT}V(x_{\triangle}) \\
+        &\approx \triangle \pi(x_0) + (1-r\triangle)[V(x_0)+ V'(x_0)(x_{\triangle}-x_0)] \\
+        &\approx \triangle \pi(x_0) + (1-r\triangle)[V(x_0)+ V'(x_0)\triangle \mu] \\
+    \end{split}\]
+    We can then do our traditional rearrangement:
+    \[\begin{split}
+        &V(x_0) = \triangle \pi(x_0) + (1-r\triangle)[V(x_0)+ V'(x_0)\triangle \mu] \\
+        \implies &r\triangle V(x_0) = \triangle \pi(x_0) + (1-r\triangle)V'(x_0)\triangle \mu\\
+        \implies &rV(x_0) = \pi(x_0) + (1-r\triangle)V'(x_0)\mu \\
+        \implies &\lim_{\triangle \to 0}rV(x_0) = \pi(x_0) + \mu V'(x_0)
+    \end{split}\]
+    The solution is characterized by two boundary conditions, \textbf{value matching} and \textbf{smooth pasting}. Value matching implies that at optimal $x^*$, 
+    \[V(x^*) = S\]
+    This condition ensures that there is no discountinuity at the threshold. In other words, at the threshold, the firm is indifferent about continuing and stopping. Smooth pasting implies that at optimal $x^*$,
+    \[V'(x^*) = \frac{dS}{dx} = 0\]
+    This condition ensures that at the optimal point, the function is smooth (there is no kink, the derivative approaching from both sides is the same). These conditions combined with the HJB yield the solution. Taking our earlier condition that $\pi(x^*) = rS$, we have
+    \[\begin{split}
+        rV(x^*) &= \pi(x^*) + \mu V'(x_0) \\
+        &= rS + \mu V'(x_0)
+    \end{split}\]
+    \item \textbf{Stochastic Case: Recursive Formulation}: the recursive formulation is now
+    \[\begin{split}
+        V(x_0) &= E_0\left[\int_0^{\triangle} e^{-rt} \pi(x_t)dt + e^{-r\triangle}V(x_{\triangle})\right] \\
+        &\approx \pi(x_0)\triangle + (1-r\triangle)E_0[V(x_{\triangle})] \\
+        \implies \triangle rV(x_0) &= \pi(x_0)\triangle + (1-r\triangle)E_0[V(x_{\triangle}) - V(x_0)] \\
+        \implies rV(x_0) &= \pi(x_0) + \frac{1-r\triangle}{\triangle}E_0[V(x_{\triangle}) - V(x_0)] 
+    \end{split}\]
+    In the limiting case of $\triangle \to 0$, this final equation is
+    \[rV(x_0) = \pi(x_0) + \frac{E[dV(x_0)]}{dt}\]
+    This final term is computed using Itô's Lemma:
+    \[rV(x) = \pi(x) + V'(x)\mu + \frac{1}{2}V''(x)\sigma^2\]
+    This again yields a threshold solution $x^*$, and the solution is characterized by
+    \[\begin{split}
+        rV(x) &= \begin{cases}
+        \frac{1}{r}\left[\pi(x) + V'(x)\mu + \frac{1}{2}V''(x)\sigma^2\right] & x > x^* \\
+        S & x \leq x^*
+        \end{cases} \\
+        V(x^*) &= S \\
+        V'(x^*) &= 0
+    \end{split}\]
+    \item \textbf{Lumpy Investment}: a firm can pay $I$ to build a new plant. This is a sunk cost (no scrap value), and discrete/lumpy (can build the entire plant or none of the plant). When the plant is built at time $T$, it provides a constant profit flow $\pi_T$ forever. However, $\pi_t$ evolves stochastically until the plant is built. The payoff to building a plant at time $t$ (PDV) is then
+    \[\int_0^{\infty}e^{-rs}\pi_tds = -\frac{e^{-rs}\pi_t}{r}\bigg|_0^{\infty}= \frac{\pi_t}{r}\]
+    We define this PDV variable as
+    \[\Pi_t = \frac{\pi_t}{r}\]
+    This variable follows a geometric Brownian motion:
+    \[d\Pi_t = \mu \Pi_tdt + \sigma \Pi_tdW_t\]
+    So the problem facing the firm is picking time $T$ to maximize
+    \[\max_{T \geq 0}\; e^{-rT}\left(\Pi_T - I\right)\]
+    We will also assume that $r > \mu$ to ensure that the $T$ is finite. If not, the drift is greater than the discount rate, so the agent may wait indefinitely. We will again have a threshold function. Going off of the previous example, this implies that the solution is characterized by
+    \[\begin{split}
+        V(\Pi_t) &= \begin{cases}
+        \frac{1}{r}\left[V'(\Pi_t)\mu \Pi_t + \frac{1}{2}V''(\Pi_t)\left(\sigma\Pi_t\right)^2\right] & \Pi_t < \Pi^* \\
+        \Pi_t - I & \Pi_t \geq \Pi^*
+        \end{cases} \\ 
+        V(\Pi^*) &= \Pi^* - I \\
+        V'(\Pi^*) &= 1
+    \end{split}\]
+    The first condition is the traditional HJB. The second condition is value matching (no discontinuity at threshold). The third condition is smooth pasting (no kinks). We solve this by guessing a functional form of the value function, namely that $V(\Pi) = \alpha \Pi^{\beta}$. Then we have that
+    \[\begin{split}
+        V'(\Pi) &= \alpha\beta \Pi^{\beta - 1} \\
+        V''(\Pi) &= \alpha\beta(\beta - 1)\Pi^{\beta - 2}
+    \end{split}\]
+    Then for $\Pi_t < \Pi^*$, the HJB yields
+    \[\begin{split}
+        &r\alpha \Pi^{\beta} =\left(\alpha\beta \Pi^{\beta - 1}\right)\mu\Pi + \frac{1}{2}\left(\alpha\beta(\beta - 1)\Pi^{\beta - 2}\right)\sigma^2\Pi^2 \\
+        \implies &r\alpha \Pi^{\beta} =\left(\alpha\beta \Pi^{\beta}\right)\mu + \frac{1}{2}\left(\alpha\beta(\beta - 1)\Pi^{\beta}\right)\sigma^2 \\
+        \implies &r\Pi^{\beta} =\Pi^{\beta}\left(\beta \mu + \frac{1}{2}\beta(\beta - 1)\sigma^2\right) \\
+        \implies &r =\beta \mu + \frac{1}{2}\beta(\beta - 1)\sigma^2 \\
+        \implies &\beta^2\left(\frac{\sigma^2}{2}\right) + \beta\left(\mu-\frac{\sigma^2}{2}\right) - r = 0
+    \end{split}\]
+    The quadratic formula implies that
+    \[\beta = \frac{1}{\sigma^2}\left(\frac{\sigma^2}{2} - \mu \pm \sqrt{\left(\mu - \frac{\sigma^2}{2}\right)^2 + 2\sigma^2r}\right)\]
+    We note that
+    \[\sqrt{\left(\mu - \frac{\sigma^2}{2}\right)^2 + 2\sigma^2r}-\mu - \frac{\sigma^2}{2} > 0\]
+    If $\beta < 0$, the value function is decreasing in $\Pi$, which doesn't make a lot of sense (implicitly restricting $\beta > 0$). Thus, we have
+    \[\beta = \frac{1}{\sigma^2}\left(\frac{\sigma^2}{2} - \mu + \sqrt{\left(\mu - \frac{\sigma^2}{2}\right)^2 + 2\sigma^2r}\right)\]
+    We can bound $\beta > 1$ using $\mu < r$. Then, putting this functional form into the value matching and smooth pasting conditions:
+    \[\begin{split}
+        \alpha\Pi^{*\beta} &= \Pi^* - I \\
+        \alpha\beta \Pi^{*\beta - 1} &= 1
+    \end{split}\]
+    The ratio of these conditions implies that
+    \[\begin{split}
+        &\frac{\Pi^*}{\beta} = \Pi^* - I \\
+        \implies &\Pi^* = \left(\frac{\beta}{\beta - 1}\right)I
+    \end{split}\]
+    We can compute a comparative static:
+    \[\begin{split}
+         \frac{\partial \Pi^*}{\partial \beta} &= \left(\frac{(\beta-1)-\beta}{(\beta - 1)^2}\right)I \\
+         &= -\left(\frac{1}{(\beta - 1)^2}\right)I \\
+         &<0
+    \end{split}\]
+    So the threshold is decreasing in $\beta$. As $\beta$ is increasing in $r$, this implies that $\Pi^*$ is decreasing in $r$. So if interest rates are higher, there's more investment (the threshold is lower), which is sort of backwards. However, the reason for this is that if $r$ is high, agents can be more patient and wait for higher realizations of $\Pi_t$. Also, as $\beta$ is decreasing in $\sigma$, $\Pi^*$ is increasing in $\sigma$. As there is more uncertainty, there is less investment, as the value of waiting is increased (you can invest when $\Pi_t$ is high, which happens more often when $\sigma$ is high; you don't care about the value of $\Pi_t$ is if it's below the threshold).
+    \item \textbf{Non-Convex Adjustment Costs}: there is a class of problems that does not involve convex adjustment costs (perhaps there are fixed costs, for example). An example is the below (housing transaction costs)
+    \item \textbf{Housing Transaction Costs}: suppose net worth follows a geometric Brownian motion, given by
+    \[da_t = \mu a_t dt + \sigma a_t dW_t\]
+    Households discount the future at rate $\rho$, and allocate a fraction of their wealth to housing wealth $h_t$. This fraction $x_t$ is then
+    \[x_t \equiv \frac{h_t}{a_t}\]
+    Changing housing wealth (i.e., to move) requires the agent to take on a fixed cost $C$. The agent always wants to hit their optimal ratio of housing wealth $x^*$, but as their wealth fluctuates, they periodically need to change their housing share to get close to the target. We denote the gap between the two as
+    \[y_t \equiv \frac{x^*}{x_t}\]
+    And correspondingly we define a quadratic loss function that agents attempt to minimize:
+    \[L(y_t) = (y_t - 1)^2\]
+    Then the household tries to minimize this loss function by picking times $\{\tau_t\}$ and housing shares $\{y_t\}$ to solve
+    \[\min_{\{\tau_i,y_i\}_0^{I}}\;\int_0^{\infty}\left(y_t-1\right)^2e^{-rt}dt + \sum_{i=0}^{I}e^{-r\tau_i}\]
+    You clearly do not want to infinitely adjust, or your loss is infinite. First note that
+    \[y_t = \frac{x^*}{x_t} = \frac{x^*a_t}{h_t} \implies y_t = f(a_t)\]
+    By Itô's Lemma:
+    \[\begin{split}
+        dy_t &= \left[f'(a_t)\mu a_t + \frac{1}{2}f''(a_t) \sigma a_t\right]dt + f'(a_t)a_t\sigma dW_t \\
+        &= \left(\frac{x^*a_t}{h_t}\right)\left(\mu dt + \sigma dW_t\right) \\
+        &= \mu y_t dt + \sigma y_t dW_t
+    \end{split}\]
+    This is another geometric Brownian motion. We now turn to the optimal policy. In this case, if $y_t \notin [\underline{y}, \overline{y}]$, then you adjust to $y^*$. This target might not be $1$, i.e. $y^* \neq 1$. This is because if you know that your wealth will trend in a certain direction (so you know $\mu$) and $C$ is sufficiently high, you want to incur $C$ as infrequently as possible and prioritize staying within the bounds that don't require adjustment rather than adjusting to the target. To get the HJB, we follow the normal steps:
+    \[\begin{split}
+        V(y_0) &= \int_0^{\triangle}(y_t - 1)^2dt + e^{-\rho\triangle}E[V(y_{\triangle})] \\
+        &\approx (y_0-1)^2\triangle + (1-\rho\triangle)E[V(y_{\triangle})] \\
+        \implies \rho V(y_0) &= (y_0 - 1)^2 + \frac{1-\rho \triangle}{\triangle}E[V(y_{\triangle}) - V(y_0)] \\
+        \implies \rho V(y_t) &= (y-1)^2 + \frac{E[dV(y_t)]}{dy_t} \\
+        \implies \rho V(y_t) &= (y-1)^2 + V'(y_t)\mu y_t + \frac{1}{2}V''(y_t)(\sigma y_t)^2
+    \end{split}\]
+    Now, however, note that our value matching and smooth pasting conditions have two possible discontinuity points, so must satisfy both:
+    \[\begin{split}
+        L(\underline{y}) &= C + L(y^*) \\
+        L(\overline{y}) &= C + L(y^*) \\
+        L'(\underline{y}) &= L'(y^*) \\
+        L'(\overline{y}) &= L'(y^*)
+    \end{split}\]
+    To ensure optimality, we need one final condition: \textbf{optimal targets}. In previous examples, there was an option (binary, yes/no), while here, we can adjust wherever we want. As such, we require that the loss is minimized at the target, so
+    \[L'(y^*) = 0\]
+    As this is a function of one variable, it may be helpful to plot the solution:
+    \begin{center}
+        \begin{tikzpicture}[scale=1,thick]
+    
+          \begin{axis}[
+              samples = 100,     		
+              xmin = 2, xmax = 8,
+              ymin = 0, ymax = 15,
+              xlabel = $y_t$,
+              ylabel = $L(y_t)$,
+              xticklabels={,,},
+              yticklabels={,,},
+              x tick label style={major tick length=0pt},
+              y tick label style={major tick length=0pt},
+              axis y line = left,    
+              axis x line = bottom,
+              every axis x label/.style={
+                    at={(ticklabel* cs:1)},
+                    anchor=north,
+                },
+                every axis y label/.style={
+                    at={(ticklabel* cs:1)},
+                    anchor=east,
+                },
+              extra y ticks={1, 10.48},
+              extra y tick labels={$L(y^*)$, $L(y^*) + C$},
+              extra x ticks={3.85, 5, 6.16},
+              extra x tick labels={$\underline{y}$, $y^*$, $\overline{y}$}
+            ]
+            
+            \addplot[red,thick,
+            domain=3.85:6.16]{(x-3)*(x-5)*(x-7))^2 + 1};
+            \draw [red,thick] (2,10.48) -- (3.85,10.48);
+            \draw [red,thick] (6.16,10.48) -- (8,10.48);
+            \draw [black,thick,dotted] (2,1) -- (5,1);
+            \draw [black,thick,dotted] (3.85,10.48) -- (3.85,0);
+            \draw [black,thick,dotted] (6.16,10.48) -- (6.16,0);
+            \draw [black,thick,dotted] (5,1) -- (5,0);
+          \end{axis}
+        \end{tikzpicture}
+    \end{center}
+    Note that the precise functional form of the interior of $[\underline{y}, \overline{y}]$ is given by the HJB, a differential equation, so the above is just a representation. We now consider asymmetric adjustment costs, such that the fixed cost of adjustment $C$ takes the form
+    \[C(\triangle y) = \begin{cases}
+    \underline{C} & \triangle y > 0 \\
+    0 & \triangle y = 0 \\
+    \overline{C} & \triangle y < 0
+    \end{cases}\]
+    This will change the value matching conditions, but not the smooth pasting condition. The value matching conditions are now
+    \[\begin{split}
+        L(\underline{y}) &= \underline{C} + L(y^*) \\
+        L(\overline{y}) &= \overline{C} + L(y^*) \\
+    \end{split}\]
+    Now imagine that there are fixed and variable costs that differ depending on the direction of adjustment; specifically:
+    \[C(\triangle y) = \begin{cases}
+    \underline{C} + \underline{c}(\triangle y)& \triangle y > 0 \\
+    0 & \triangle y = 0 \\
+    \overline{C} + \overline{c}(\triangle y) & \triangle y < 0
+    \end{cases}\]
+    We assume that $\overline{C}, \underline{C} > 0$, and that $\overline{c}(\cdot),\underline{c}(\cdot)$ continuously differentiable, and $\underline{c}(\cdot) > 0$ and $\overline{c}(\cdot) < 0$. In this case, we will actually have two different targets, $\underline{y}^*$ and $\overline{y}^*$. Then value matching will change:
+    \[\begin{split}
+        L(\underline{y}) &= \underline{C} + \underline{c}(\underline{y}^* - \underline{y}) + L(\underline{y}^*) \\
+        L(\overline{y}) &= \overline{C} + \overline{c}(\overline{y}^* - \overline{y}) + L(\underline{y}^*) \\
+    \end{split}\]
+    Smooth pasting will change (differentiate with respect to $y$, ensure that the derivatives match at discontinuities):
+    \[\begin{split}
+        L'(\underline{y}) &= -\underline{c}'(\underline{y}^* - \underline{y}) \\
+        L'(\overline{y}) &= -\overline{c}'(\overline{y}^* - \overline{y})
+    \end{split}\]
+    Finally, we require that both targets are optimal (differentiate with respect to the optimal values):
+    \[\begin{split}
+        L'(\underline{y}^*) &= -\underline{c}'(\underline{y}^* - \underline{y}) \\
+        L'(\overline{y}^*) &= -\overline{c}'(\overline{y}^* - \overline{y})
+    \end{split}\]
+    Fixed costs create an inaction region (like sS models). The size of the region is typically increasing in adjustment cost, discount factor, and uncertainty. Uncertainty's effect on adjustment frequency is ambiguous: it widens the inaction region, but it also pushes agents outside of it more often.
+\end{itemize}
+
+\subsection{Income Fluctuation Problem}
+
+\begin{itemize}
+    \item We care about the distribution of wealth and income, as well as the transitional dynamics (so not just focusing on steady state). This gives rise to incomplete market models, where agents are identical ex ante, but differ ex post due to uninsurable shocks.
+    \item \textbf{Markov Process}: a stochastic process (sequence) $\{x_t\}$ displays the Markov property if
+    \[P(x_{t+1} = \overline{x}|x_t,x_{t-1},\hdots)=P(x_{t+1} = \overline{x}|x_t)\]
+    That is to say, the prior value determines the distribution of the current value. Then, a Markov chain is a state vector $X$ and a transition matrix $\Pi$. $X$ is representing the possible outcomes that the process can take:
+    \[X = \begin{bmatrix}
+    \overline{x}_1 \\
+    \overline{x}_2 \\
+    \vdots \\
+    \overline{x}_N
+    \end{bmatrix}\]
+    Then the matrix $\Pi$ gives the transition probabilities. Specifically, the $(i,j)^{th}$ element of $\Pi$ represents
+    \[\Pi_{ij} = P(x_{t+1} = \overline{x}_j|x_t = \overline{x}_i)\]
+    So the transition matrix is a stochastic matrix, which has properties:
+    \begin{itemize}
+        \item $\Pi_{ij} \geq 0$
+        \item $\sum_{j=1}^N\Pi_{ij} = 1$
+    \end{itemize}
+    To visualize this informally, we can write
+    \[\Pi = \begin{bmatrix}
+    \overline{x}_1 \to \overline{x}_1 & \overline{x}_1 \to \overline{x}_2 & \hdots & \overline{x}_1 \to \overline{x}_N \\
+    \overline{x}_2 \to \overline{x}_1 & \overline{x}_2 \to \overline{x}_2 & \hdots & \overline{x}_2 \to \overline{x}_N \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \overline{x}_N \to \overline{x}_1 & \overline{x}_N \to \overline{x}_2 & \hdots & \overline{x}_N \to \overline{x}_N
+    \end{bmatrix}\]
+    If we define a vector $\varphi$ as the distribution of the stochastic process, written as
+    \[\varphi = \begin{bmatrix}
+    P(x_{t+1} = \overline{x}_1) \\
+    P(x_{t+1} = \overline{x}_2) \\
+    \vdots \\
+    P(x_{t+1} = \overline{x}_N)
+    \end{bmatrix}\]
+    Then we note that the evolution of $\varphi$ is given by
+    \[\varphi_{t+1}' = \varphi_t'\Pi\]
+    This is because the unconditional probability of one of the outcomes occurring is just the sum of products of probability of state occurring and probability of transitioning from that state to the given state. Formally,
+    \[P(x_{t+1} = \overline{x}_1) = \sum_{i=1}^NP(x_t = \overline{x}_i)\times P(x_{t+1} = \overline{x}_1|x_t = \overline{x}_i)\]
+    Then the stationary distribution of a process is simply where
+    \[\varphi' = \varphi'\Pi\]
+    That is, where the distribution does not change over time. We also note that we can get further leads of $\varphi$ by just exponentiating the matrix:
+    \[\varphi_{t+2}' = \varphi_{t+1}'\Pi = \varphi_t'\Pi^2\]
+    If we transpose the stationarity condition, then we get
+    \[\Pi \varphi = \varphi\]
+    This is the definition of an eigenvector; that is, a vector whose product with a given matrix provides the vector itself (scaled by an eigenvalue, which we need not consider since we're prescribing the condition that the rows of the matrix sum to 1, which guarantees that $\varphi$ will be a well-defined distribution whose elements sum to 1). However, we aren't guaranteed uniqueness (there may be more than one unit eigenvalue).
+    \item \textbf{Uniqueness of Stationary Distribution}: two conditions will yield a unique stationary distribution:
+    \begin{enumerate}
+        \item $\Pi_{ij} > 0 \forall \{i,j\}$
+        \item $\Pi^n_{ij} > 0 \forall \{i,j\}$ for some $n$.
+    \end{enumerate}
+    The first condition implies the second. The intuition for this is that if there is an element of the distribution with zero transition probability, the distribution can become degenerate. Further, if an element is 1, we get an absorbing state where only one outcome is possible; this distribution is not unique and depends on the initial conditions. We can find the stationary distribution by either iterating on an initial guess until we find convergence, or just computing the eigenvalues of a matrix, and picking the one that's associated with the unit eigenvalue.
+    \item \textbf{Law of Large Numbers}: if $\{x_t\}$ is a process induced by a Markov chain with a unique stationary distribution, then 
+    \[\frac{1}{T}\sum_{t=1}^Tx_t \overset{a.s.}{\to} E[x_t]\]
+    This means almost surely, i.e. converging with probability 1. We can get this expectation by either computing the series average and simulating a bunch of $x_t$ values, or we can just compute
+    \[E[x] = \varphi'X\]
+    \item \textbf{Discretized Income Fluctuation Problem}: suppose income $\{z_t\}_0^{\infty}$ follows a Markov chain. The state vector and transition matrix are defined as above. A risk-free asset pays a risk-free net return $r$. The budget constraint is
+    \[a_{t+1} = (1+r)a_t - c_t+z_t\]
+    Assets $a_t$ are also restricted to a discrete grid $\mathcal{A} = \{\overline{a}_1, \hdots, \overline{a}_M\}$. In particular, note that this implies that $c$ is not continuous! So then given $a_0$, the household solves
+    \[\max_{a_{t+1}\in\mathcal{A}}\;\sum_{t=0}^{\infty}\beta^tu\left((1+r)a_t + z_t - a_{t+1}\right)\]
+    The value function will then satisfy the Bellman equation
+    \[V(a_t, \overline{z}_t) = \max_{a_{t+1} \in \mathcal{A}}\; u\left((1+r)a_t + \overline{z}_t - a_{t+1}\right) + \beta E[V(a_{t+1}, \overline{z}_t)]\]
+    Note that given the choice variable, the expectation term can be written in terms of the Markov chain variables:
+    \[V(a_t, \overline{z}_j) = \max_{a_{t+1} \in \mathcal{A}}\; u\left((1+r)a_t + \overline{z}_j - a_{t+1}\right) + \beta \sum_{j=1}^N\Pi_{ij}V(a_{t+1}, \overline{z}_j)\]
+    This problem is generally solved numerically. The exceptions:
+    \begin{enumerate}
+        \item CRRA and permanent, multiplicative (rate of return) risk. CRRA utility is
+        \[u(c) = \frac{c^{1-\gamma}}{1-\gamma}\]
+        \item Quadratic or CARA utility:
+        \[u(c) = -\frac{e^{-\gamma c}}{\gamma}\]
+        The risk aversion is independent of wealth. Quadratic utility is
+        \[u(c) = -\frac{\alpha(c-\kappa)^2}{2}\]
+        \item CRRA utility and agents choose the amount of risk (the Merton model we looked at before). 
+    \end{enumerate}
+    To solve the problem numerically, we use value function iteration, which requires the \textbf{contraction mapping theorem}.
+    \item \textbf{Metric Space}: a metric space $(S,d)$ is a set $S$ and a metric $d$ on that set. For the set $\mathds{R}$, for example, the most traditional metric that we use would be absolute value ($| |$). In a metric space $(S,d)$, a sequence $\{x_t\}$ is a Cauchy sequence if $\forall \varepsilon > 0$, $\exists N$ such that $\forall m,n > N$, 
+    \[d(x_m,x_n) < \varepsilon\]
+    A metric space is complete if every Cauchy sequence in $S$ has a limit in $S$. 
+    \item \textbf{Contraction Mapping}: Let $(S,d)$ be a metric space. A function $T:S\to S$ is a contraction mapping with modulus $\beta$ if $\exists \beta \in (0,1)$ such that 
+    \[d(Tv_1, Tv_2) \leq \beta d(v_1,v_2)\; \forall v_1,v_2 \in S\]
+    An example could be the Bellman mapping:
+    \[T(V) = \max_{a'\in\Gamma(a)}\;U(a,a') + \beta V(a')\]
+    where $u(\cdot),V(\cdot)$ are continuous, bounded functions. Alternatively, there's the Howard mapping:
+    \[T_{a'(a)}(V) = [u(a,a'(a)) + \beta V(a'(a))]\]
+    \item \textbf{Blackwell's Sufficiency Conditions for a Contraction Mapping}: we just want to know when a mapping is a contraction mapping so that we can use VFI. To do this, we use Blackwell's Sufficiency conditions. Let $X \subseteq \mathds{R}^k$ and $B(X)$ be the space of bounded functions $f:X\to \mathds{R}$. Let $T:B(K) \to B(K)$ be an operator satisfying 
+    \begin{enumerate}
+        \item Monotonicity: if $v_1,v_2\in B(X)$ and $v_1(x) \leq v_2(x)$ for all $x\in X$, then $Tv_1(x) \leq Tv_2(x)$ for all $x\in X$.
+        \item Discounting: There exists $\beta \in (0,1)$ such that 
+        \[T(v+c)(x) \leq Tv(x) + \beta c\]
+        for all $v \in B(X)$, $x\in X$, and $c \geq 0$.
+    \end{enumerate}
+    If these conditions are satisfied, then $T$ is a contraction mapping with modulus $\beta$.
+    \item \textbf{Contraction Mapping Theorem}: If $(S,d)$ is a compete metric space and $T:S\to S$ is a contraction mapping with modulus $\beta$, then
+    \begin{enumerate}
+        \item $T$ has a unique fixed point $v^* \in S$
+        \item For any $v^0 \in S$, $d(T^nv_0,v^*)\leq \beta^nd(v_0,v^*)$
+    \end{enumerate}
+    We always get convergence with any initial guess, and the rate of convergence is $\beta$. 0 is a bad guess, though.
+    \item \textbf{Termination}: the triangle inequality yields
+    \[||V^n - V^*||_{\infty} \leq ||V^n - V^{n+1}||_{\infty} + ||V^{n+1} - V^*||_{\infty}\]
+    From the Contraction Mapping Theorem, we have
+    \[||V^{n+1} -V^*||_{\infty} \leq \beta ||V^n-V^*||_{\infty}\]
+    Combined, these yield the limit on the error at the $n^th$ iteration:
+    \[||V^n - V^*||_{\infty} \leq \frac{||V^n-V^{n+1}||_{\infty}}{1-\beta}\]
+    So to find convergence within $\varepsilon$, stop when 
+    \[||V^n-V^{n+1}||_{\infty} \leq (1-\beta)\varepsilon\]
+    The interpretation of this value is not super clear -- can try to do percentage, but then you run into issues when the value is 0. Alternatively, you can use convergence in policy space, which is often faster than value function convergence, and has a clear interpretation.
+\end{itemize} 
+
+\subsection{Incomplete Market Models}
+
+\begin{itemize}
+    \item To reiterate, IMMs are based on the idea that all households are the same ex ante, but face uninsurable risk which causes them to differ ex post. This uninsurable risk can arise from moral hazard, adverse selection, asymmetric information, or capital market imperfections. Because there is incomplete insurance and imperfect credit markets, agents do not have the ability to maintain constant income, which leads to the income fluctuation problem. In an incomplete market framework, agents try to self-insure against earning risk using savings. Incomplete market frameworks also incorporate the idea of general equilibrium, so credit/financial markets must clear (agents borrow and lend to one another, assets must be in zero net supply).
+    \item To incorporate earning risk, there are two traditional approaches:
+    \begin{enumerate}
+        \item Unemployment
+        \begin{itemize}
+            \item Empirically, expected unemployment duration is around 6 months, and the replacement ratio is around 40\%.
+            \item We can model this with a two state Markov process (employed and unemployed)
+        \end{itemize}
+        \item Labor productivity risk.
+        \begin{itemize}
+            \item Model log earnings $z$ as an AR(1):
+            \[z_{t+1} = (1-\rho)\overline{z} + \rho z_t + \varepsilon_t\]
+            where
+            \[\varepsilon \sim \mathcal{N}(0,\sigma^2)\]
+            \item In this case, $z$ is continuous. 
+        \end{itemize}
+    \end{enumerate}
+    If we use the labor productivity risk setup, then the income fluctuation problem is
+    \[\begin{split}
+        &V(a,\overline{z}) = \max_{a'\in\mathcal{A}}\; u((1+r)a + e^{\overline{z}} - a') + \beta E[V(a', \overline{z}')] \\
+        \implies &V(a,\overline{z}) = \max_{a'\in\mathcal{A}}\; u((1+r)a + e^{\overline{z}} - a') + \beta \int V(a',\overline{z}')f(\overline{z}'|\overline{z})dz
+    \end{split}\]
+    For infinite $z$, this is a problem, since the problem is infinite-dimensional (we can pick any $z$). We need to discretize the AR(1), then, to make this manageable. To do this, we'll use Tauchen's method. We chop up $z$ into a discrete grid, so
+    \[z \in \mathcal{Z} \equiv \{z_1, \hdots, z_N\}\]
+    The process will transition between these probabilities. Now, we note that the unconditional distribution is normal and has moments
+    \[\begin{split}
+        E[z] &= \overline{z} \\
+        V[z] &= \frac{\sigma^2}{1-\rho^2} 
+    \end{split}\]
+    The conditional distribution is normal and has moments
+    \[\begin{split}
+        E[z'|z] &= (1-\rho)\overline{z} + \rho z \\
+        V[z'|z] &= \sigma^2
+    \end{split}\]
+    We can now pick the specific values of our state vector. We can just pick $m$ to be the number of standard deviations that we want to cover, and then space, our state values a standard deviation apart:
+    \[\mathcal{Z} = \left\{\overline{z} - m\frac{\sigma}{1-\rho^2}, \overline{z} -(m-1)\frac{\sigma}{1-\rho^2}, \hdots, \overline{z} +(m-1)\frac{\sigma}{1-\rho^2}, \overline{z} + m\frac{\sigma}{1-\rho^2} \right\}\]
+    For the transition probability matrix, just chop up the conditional distribution into equally sized segments, and use the conditional CDF to get the transition probabilities (I'm not going to write out the math because I don't think it's helpful). Then as we established previously, we can write the income fluctuation problem as
+    \[V(a_i, z_j) = \max_{a_i' \in \mathcal{A}}\; u((1+r)a_i + z_j - a_i') + \beta \sum_{k=1}^N\Pi_{ik}V(a_i', z_k)\]
+    We will generally use Tauchen with $N\geq 9$ to approximate well. The exception is persistent processes ($\rho \approx 1$), which are better approximated with Rouwenhorst's method. We can use these methods to approximate any AR(1). For the given AR(1), we traditionally use $\rho = .9$ and $\sigma_{\varepsilon} = .2$. This captures fluctuations over a lifetime, not permanent differences across individuals (identical ex ante).
+    \item \textbf{General Solution to IFP}: when we solve the IFP, we get a value function $V(a_i,z_j)$ and a policy function $a'(a_i,z_j)$ given the wealth and income grids $\mathcal{A}, \mathcal{Z}$. The distribution across states is given by shocks to the income component, and agents try to self-insure by saving. The invariant distribution is then
+    \[\varphi(a_i,z_j) = P(a=a_i,z=z_j)\]
+    Here, there is movement across states, but no \textit{net} movement. We can use our Markov chain results to solve this problem.
+    \item \textbf{Vectorization}: the issue is that we have a two-dimensional state space now, and we only have results for one-dimensional Markov chains. We can solve this by ``squeezing" or ``flattening" the state space (if you're familiar with programming languages). If we have a $N\times M$ matrix, we can make this a $NM\times 1$ vector of tuples like so:
+    \[\mathcal{S} = \begin{bmatrix}
+    (a_1, z_1) \\
+    (a_1, z_2) \\
+    (a_1, z_3) \\
+    \vdots \\
+    (a_N, z_1) \\
+    (a_N, z_2) \\
+    \vdots \\
+    (a_N, z_M)
+    \end{bmatrix}\]
+    The policy function will then map a state to another state. However, the policy function only controls $a$; $z$ is exogeneous and stochastic. So the transition matrix is a little complicated. It's going to be $NM \times NM$, as it needs to map every element of $\mathcal{S}$ to $\mathcal{S}$. However, the policy function will cause this matrix to be sparse (lots of zeros). This is because the policy function maps every value of $a$ to \textbf{one} element of $\mathcal{A}$. For example, if the policy function says that for state variable $a_1$, the optimal choice is $a_1$, \textit{the probability of transitioning to any element of $\mathcal{S}$ that does not have $a_1$ as an element is 0}. We call this transition matrix $\Upsilon$. Once we have this matrix, we can compute the invariant distribution of state variables (for every member of $\mathcal{S}$) using the eigenvalue method or iteration. This will allow us to assess general equilibrium in the Aiyagari model later.
+\end{itemize}
+
+\subsection{Huggett Model}
+
+\begin{itemize}
+    \item This model is created to try to resolve the equity premium puzzle, namely that using calibrated representative agent models, the risk free rate is much too high compared to the return. The goal of the model is to use GE to get a low risk-free rate. This is a pure credit model. The only factor of production is labor, and agents can trade IOUs to one another subject to a borrowing limit. There is a unit mass of households who are infinitely lived, and whose income follows a Markov chain. The asset holdings are traded amongst the agents, and are in zero net supply (as well as riskless). We're looking for a stationary equilibrium. 
+    \item \textbf{Equilibrium}: the equilibrium of this model is an interest rate $r$, a policy function $a'(a,z)$, and a stationary distribution $\varphi(a,z)$ such that
+    \begin{enumerate}
+        \item The policy function solves the household's problem
+        \item The stationary distribution is consistent with the policy function and implied transition matrix $\Upsilon$
+        \item The asset market clears:
+        \[\sum_{i=1}^M\sum_{j=1}^Na'(a,z)\varphi(a,z) = 0\]
+    \end{enumerate}
+    To compute the equilibrium, recursively guess $r$, compute the excess bond demand, and then based on the result, update $r$. We can use the bisection algorithm to find the root of the function, which will work for monotonic and continuous functions.
+    \item \textbf{Representative Agent Comparison}: agents have no income uncertainty, have $\overline{z} = E[z]$ each period. They solve the problem
+    \[\max_{c}\; \sum_{t=0}^{\infty}\beta^tu(c_t)\]
+    subject to
+    \[a_{t+1} = (1+r)a_t - c_t + \overline{z}\]
+    where there is some borrowing limit $a_{t+1} \geq a_{min}$. The FOC implies
+    \[u(c_t) = (1+r)\beta u'(c_{t+1})\]
+    At equilibrium, $c = \overline{z}$, and $(1+r)\beta = 1$. The Huggett interest rate is lower than the representative agent because agents are trying to self-insure and are predisposed to save, but the zero net supply GE framework implies that someone must be willing to lend the IOU, which means that the interest rate must drop until enough agents would rather lend than borrow. This doesn't really solve the puzzle though; how does the borrowing limit affect $r$? What about risk aversion?
+\end{itemize}
+
+\subsection{Aiyagari Model}
+
+\begin{itemize}
+    \item This model incorporates a neoclassical production function, where individual saving represents capital stock. It also allows us to answer questions about optimal unemployment insurance; high unemployment insurance will lead to smoother individual fluctuations, but will decrease capital accumulation (don't need to self-insure as much). 
+    \item \textbf{Setup}: there's a unit mass of individuals, who face an idiosyncratic risk to labor endowment $\ell$, but earn $w\ell$ for their labor. They can borrow/save a risk-free asset at rate $r$. The representative firm produces output with capital $K$ and labor $L$:
+    \[F(K,L) = AK^{\alpha}L^{1-\alpha}\]
+    Wealth is invested in physical capital and evolves as
+    \[K_{t+1} = (1-\delta)K_t + I_t\]
+    The wage and interest rate are the marginal products of labor and capital, and are thus determined by the level of capital, $K$. 
+    \item \textbf{Equilibrium}: a stationary equilibrium in this model is a capital stock $K$, prices $r$ and $w$, a policy function $a'(a,\ell)$ and a stationary distribution $\varphi(a,\ell)$ such that
+    \begin{enumerate}
+        \item Prices are set competitively:
+        \[\begin{split}
+            r &= \alpha AK^{\alpha - 1}L^{1-\alpha} -\delta\\
+            w &= (1-\alpha)AK^{\alpha}L^{-\alpha}
+        \end{split}\]
+        \item The policy function solves the household's problem
+        \item The stationary distribution is consistent with the policy function
+        \item The capital stock equals aggregate savings:
+        \[K = \sum_{i=1}^N\sum_{j=1}^M\varphi(a_i,\ell_j)a'(a_i,\ell_j)\]
+    \end{enumerate}
+    We can find this value using the root-finding algorithm, where we make a guess of where $x_n = f(x_n)$ and update if it's wrong:
+    \[x_{n+1} = x_n + \triangle (f(x_n) - x_n)\]
+    Do this for capital stock:
+    \[K_{n+1} = K_n + \triangle(S_n - K_n)\]
+    where $S_n$ is aggregate saving. The results are that precautionary saving contributes little to aggregate saving, and that there are large welfare gains from self-insurance.
+\end{itemize}
+
+\subsection{IM Models and The Borrowing Limit}
+
+\begin{itemize}
+    \item Our general model requires households to maximize
+    \[E_0\sum_{t=0}^{\infty}\beta^tu(c_t)\]
+    subject to
+    \[a_{t+1} \in \mathcal{A},\; a_{t+1} = (1+r)a_t - c_t + z_t\]
+    The sequential problem can be written as a recursive Bellman:
+    \[V(a_t,z_t) = \max_{a_{t+1}}\; u((1+r)a_t - c_t + z_t) + \beta E[V(z_{t+1}, a_{t+1})|z_t]\]
+    $z_t$ is stochastic and bounded below. Rewriting the budget constraint yields
+    \[c_t + a_{t+1} = z_t + (1+r)a_t\]
+    If we impose $c_t > 0$, then
+    \[\begin{split}
+        a_t &\geq \frac{a_{t+1}-z_t}{1+r} \\
+        \implies a_t &\geq \frac{a_{t+2} - z_{t+1}}{(1+r)^2} - \frac{z_t}{1+r} \\
+        \implies a_t &\geq -\left(\frac{1}{1+r}\right)\sum_{\tau = 0}^{\infty}\frac{z_t}{(1+r)^{\tau}} \\
+        \implies a_t &\geq -\left(\frac{z_t}{1+r}\right)\left(\frac{1+r-1}{1+r}\right)^{-1} \\
+        \implies a_t &\geq -\frac{z_t}{r} \\
+    \end{split}\]
+    This represents the natural borrowing limit; this is the minimum value of $a$ for which $c \geq 0$ is feasible: $-z_{min}/r$. If we take a looser version, default is possible, while a tighter version is ad hoc. We also note that in a GE model, wealth must be bounded, which means that individual wealth must be bounded, which means that there must be a point at which point individuals start to decumulate wealth. This means that for some value of $a$, $a'(a) \leq a$. This is important because it means that the household's saving choice is not constrained by our choice of grid (i.e. we need only make it sufficiently large such that $a_{max}$ is included). To assess this, we take the household's Euler equation and multiply both sides by $\beta^t(1+r)^t$:
+    \[u'(c_t) \geq \beta(1+r)E[u'(c_{t+1})] \implies u'(c_t)\beta^t(1+r)^t \geq \beta^{t+1}(1+r)^{t+1}E[u'(c_{t+1})]\]
+    If we write
+    \[M_t \equiv u'(c_t) \geq \beta(1+r)E[u'(c_{t+1})]\]
+    Then
+    \[E_t[M_{t+1} - M_t] \leq 0\]
+    As $u'(\cdot) >0$, $M >0$, so $M_t \geq M_{t+1}$ and $M_t$ converges almost surely to a nonnegative random variable. If $\beta(1_r) \geq 1$, we have shown that $u'(c_t) \to 0$, which means that $c_t \to \infty$, so $a_t \to\infty$ and wealth is not bounded. If $\beta(1+r) < 1$, however, wealth may remain bounded. We don't always need this to hold; if agents are finitely-lived or have capital return risk, we may still get GE results and finite wealth.
+    \item \textbf{Notes}: there is no guarantee that a stationary equilibrium is unique in these IMM models. Further, our AR(1) process may not actually be a good approximation of individual income risk; the real process is more leptokuric (shocks are less common and larger). Finally, we want to assess the wealth distribution in these models, asking how much inequality a microfounded version of these models will yield. It turns out that we get much less inequality. Part of this is because at some point, the rich stop saving and accumulating capital. To get real inequality data, need to get finite wealth \textit{as well as the rich saving}, which is hard.
+\end{itemize}
+
+\subsection{Estimation}
+
+\begin{itemize}
+    \item In general, we need to know how to figure out parameter values for our models. Also, we want to know how confident we can be in our predictions. There are a few different approaches that we can take to estimating our model's parameters.
+    \begin{enumerate}
+        \item \textbf{Calibration}: restrict your model's functional forms to those that make your model consistent with long-run macro facts and micro data. You do this by mapping your set of targets to the same number of parameters, and then select the parameters from micro studies. However, you cannot just transport parameters across models. \newline
+        \newline \textbf{Example}: there's a long-run macro fact that growth is balanced, so the labor share, capital/output, and $r$ are constant. This admits use of the utility and production functions
+        \[\begin{split}
+            u(c,\ell) &= \frac{c^{1-\gamma}}{1-\gamma} - \phi \frac{\ell^{1+\eta}}{1+\eta} \\
+            F(K,L) &= zK^{\alpha}L^{1-\alpha}
+        \end{split}\]
+        You can then pick a discount factor to match the ratio $K/Y$ in steady state, and $\alpha$ to match the labor share. The issue with calibration is you have to pick which moments to match, and there are a lot of combinations that could match the data. This is not a generally good method for model selection. In practice, though, you can calibrate some well-identified parameters and estimate others.
+        \item \textbf{Generalized Method of Moments} Define variables as such:
+        \begin{itemize}
+            \item \textbf{Data}: $N$ observations ($x$)
+            \item \textbf{Moments}: $M\times 1$ vector, function of data, given by $m(x)$
+            \item The model is $F(x|\theta) = 0$. The model is a function of the data given some parameters $\theta$, which is an $L \times 1$ vector. Note that we require $L \leq M$ to estimate the model. If this is not the case, the model is underidentified, and the solution is not well-defined.
+            \item \textbf{Model moments}: $m(x|\theta)$. This function is closed-form and deterministic. These are moments conditional on parameters.
+            \item \textbf{Goal}: find some $\theta$ such that
+            \[m(x|\theta) \approx m(x)\]
+            \item \textbf{Assumptions}: we assume that the data is stationary. 
+            Stationary just means that the distribution is time-invariant. We also assume that there exists some ``true" parameter vector $\theta$:
+            \[E[m(x|\theta) - m(x)] = 0\]
+            Further, we assume that $\theta$ is \textbf{identified}. This means that for $\theta \neq \widetilde{\theta}$, we have
+            \[E[m(x|\widetilde{\theta}) - m(x)] \neq 0\]
+        \end{itemize}
+        We apply GMM by choosing a distance metric $||\cdot||$ and solving the problem
+        \[\argmin_{\theta}\;||m(x|\theta) - m(x)||\]
+        Unless our model is just-identified ($L=M$), this solution will depend on the distance metric that we pick. A common metric choice is 
+        \[\argmin_{\theta}e(x|\theta)'\textbf{W}e(x|\theta)\]
+        Here, $e(x|\theta)$ is the error function (difference between $m(x)$ and $m(x|\theta)$). $\textbf{W}$ is a positive semi-definite weighting matrix. Under these conditions, GMM is consistent and asymptotically normal. The most efficient weighting matrix $\textbf{W}$ that we can pick is 
+        \[\textbf{W} = \boldsymbol{\Omega}^{-1}(x|\theta)\]
+        Here, $\boldsymbol{\Omega}^{-1}(x|\theta)$ is the inverse of the covariance matrix of errors. The idea is that you should weight moments that are more precisely estimated more than those that are not precisely estimated. This approach gives rise to iterated GMM, where you pick a starting covariance matrix (arbitrarily $\textbf{I}$) and conduct GMM, and then use that covariance matrix to estimate GMM again. You can do this process iteratively to arrive at the iterated GMM estimator. In general, two steps is asymptotically efficient, but iterated is better for small samples. So long as the problem is well-behaved, $\hat{\theta}_{GMMI}$ is a good approximation. There are examples in the notes.
+        \item \textbf{Simulated Method of Moments}: one limitation of GMM is that if there are no closed forms for model moments, then GMM cannot be calculated. With SMM, we can simulate a model $S$ times, compute the moments each time, and then take the average of those sample moments. Here, we have
+        \begin{itemize}
+            \item \textbf{Data moments}: $m$
+            \item \textbf{Model}: $F(x,z|\theta) = 0$. Here, $x$ are endogeneous variables and $z$ are exogeneous shocks.
+            \item \textbf{Model moments}: \[m(\theta) = \frac{1}{S}\sum_{s=1}^Sm(x_s,z_s|\theta)\]
+            Here, the $z_s$ are the history of shocks, which are used in all simulations (do not change).
+            \item \textbf{SMM Estimator}:
+            \[\argmin_{\theta}||m - m(\theta)||\]
+        \end{itemize}
+        \item \textbf{Indirect Inference}: Smith asks the question about whether need to actually target data moments, or whether we can just target other statistics. In this case, we can create an \textbf{auxiliary model}, which is based on real and simulated data, from which we can obtain data and model statistics. We then can perform SMM, but with these additional statistics.
+        \item \textbf{Maximum Likelihood Estimation}: if the model gives the probability of drawing $x_i$ conditional on $\theta$, then we can pick $\theta$ to maximize the observed data:
+        \[L = \prod_{i=1}^Nf(x_i|\theta)\]
+        We normally use log-likelihood so that this is a sum:
+        \[\hat{\theta}_{MLE} = \argmax_{\theta}\; \sum_{i=1}^N\log\left(f(x_i|\theta)\right)\]
+        If our model is a linear regression model with normally distributed error, then
+        \[\hat{\theta}_{MLE} = \argmax_{\theta}\; \sum_{i=1}^N\log\left(\phi(\varepsilon_i)\right)\]
+        where $\phi(\cdot)$ is the PDF of the normal distribution. This is better than GMM for statistical significance, performs better in small samples, and uses more information from the data. However, it requires stronger model assumptions (for example, needed normal distribution of error term), is more computationally intensive, and provides less flexible estimation. For quantitative macro models, generally SMM or Indirect Inference is utilized.
+    \end{enumerate}
+    \item \textbf{Identification}: there are potential problems with an identification strategy:
+    \begin{enumerate}
+        \item \textbf{Validity}: can the model match the data? This is important when $L < M$, i.e. the model is over-identified (if the model is just-identified, we don't need to worry). That is, can we actually find a $\theta$ such that
+        \[m(x|\theta) \approx m(x)\]
+        We can use the Sargant-Hansen $J$-test for over-identification, which has a null hypothesis that the model is valid.
+        \item \textbf{Identification}: is there a \textit{unique} value of $\theta$ that matches the data? If not, then we need to be worried about the predictive power of the model (how sensitive are the predictions to model parameters we choose)? If the minimization problem doesn't have a unique minimum, then we have multiple solutions. However, we also may have observational equivalence across multiple models (they all match the data similarly). We also need to worry about the model being weakly identified, meaning that the moment conditions are too similar. Imagine an under-identified model; you can always technically  make it just- or over-identified by just adding linear combinations of moments, but this will obviously not fix the problem. However, if some conditions are closely related, there may be a smooth minimum of the objective function, which does not provide a unique solution. Rank conditions are potentially useful for testing the identification of linear models. The diagnosis is harder for nonlinear models. Another way to try to find issues pertaining to weak identification is to plot the elasticity of the objective function with respect to each parameter. If the elasticity is low for parameters, then weak identification is an issue. It's also good to test the objective function for values of $\theta$ far from your solution, to see if there's any observational equivalence. Finally, can another model match the data as well as yours? If so, do the models imply different things?
+    \end{enumerate}
+    \item \textbf{Solutions}: as a last resort, you can calibrate any parameters that are hard to identify. However, if your calibrated parameters affect the objective function, this can bias your estimated parameters. You need to perform a lot of sensitivity analysis on the calibrated parameters. There are lots of degrees of freedom when choosing moments to match models, so you should choose moments that have a tight connection to the model (ones for which you can explain the connection between the moments and the model). You can actually robustness test your model by seeing if it can match untargeted parameters (testing out of sample). Finally, don't provide tight priors on parameters; this can mask identification issues and potential issues with the model. 
 \end{itemize}
 
 \section{Outstanding Questions}
@@ -2266,6 +3229,7 @@
     \item Not totally sure how to get the equation (\ref{Mean Preserving Spread}) derivation as compared to YC (Slide 5, Lecture 10).
     \item Do we really have costly job posting in our version of the McCall model? What term is that? Perhaps the firms are paying unemployment?
     \item What in the world are the long-run risks in lecture 16 slide 17?
+    \item How do we get the $rJ_t$ and $rW_t$ conditions for HJB in job search? Can we just make an intuitive argument (i.e. the value of a filled job is the surplus it generates ($p-w_t$) plus the change in the value of the job $\dot{J}_t$ less the decrease in value from a filled job to a vacancy multiplied by the likelihood that it happens ($\lambda$))?
 \end{enumerate}
 
 \end{document}
